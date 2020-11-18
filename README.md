@@ -1,4 +1,4 @@
-# catniphunter
+# RoboSamurai the CatNip Hunter
 RoboSamurai developement backup, make yourself at home.
 
 
