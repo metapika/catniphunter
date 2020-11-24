@@ -1,5 +1,35 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2934144212595263740
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 212479632764816206}
+  m_Layer: 0
+  m_Name: sword_point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &212479632764816206
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2934144212595263740}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.041, y: 0.009, z: -0.248}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 5604983372578364605}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4255617847663935198
 GameObject:
   m_ObjectHideFlags: 0
@@ -59,10 +89,10 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -1642654745573217572, guid: 749457ba64204d8e99df782ca81334d5, type: 3}
-  - {fileID: 8588245910270914291, guid: 749457ba64204d8e99df782ca81334d5, type: 3}
-  - {fileID: 269840283077852131, guid: 749457ba64204d8e99df782ca81334d5, type: 3}
-  - {fileID: -870952796764628979, guid: 749457ba64204d8e99df782ca81334d5, type: 3}
+  - {fileID: 2100000, guid: 6167220dad98a920482db3808c8bb368, type: 2}
+  - {fileID: 2100000, guid: ef3cf780f9bde27f2b4973d607d06b31, type: 2}
+  - {fileID: 2100000, guid: 6167220dad98a920482db3808c8bb368, type: 2}
+  - {fileID: 2100000, guid: 6167220dad98a920482db3808c8bb368, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -113,6 +143,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 5023996955950067173}
+  - {fileID: 212479632764816206}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
