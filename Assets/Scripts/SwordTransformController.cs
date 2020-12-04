@@ -18,14 +18,22 @@ public class SwordTransformController : MonoBehaviour
             anim.SetTrigger("Swing");
         }
     }
+    
+    private void OnCollisionEnter(Collision other) {
+        if(other.gameObject.GetComponent<Enemy>())
+            Debug.Log(" Hit enemy! ");
+    }
+    
     public void ResetTrigger()
     {
         anim.ResetTrigger("Swing");
     }
+    
     public void EnableCutter()
     {
         Cutter.enabled = true;
     }
+    
     public void DisableCutter()
     {
         Cutter.enabled = false;

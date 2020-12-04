@@ -5,25 +5,37 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour {
 
 #region Variables
+    public bool lockCursor;
+    
+    //Movement and jumping
     [SerializeField] private float speed;
     [SerializeField] private float walkSpeed = 10f;
     [SerializeField] private float sprintSpeed = 30f;
     [SerializeField] private float jumpForce = 5f;
     [SerializeField] private float jumpRaycastDistance = 1f;
-    [SerializeField] private float gravity = -9.81f;
-
-    private Vector3 velocity;
     private float speedSmoothTime = 0.1f;
-    private Animator anim = null;
+    private float speedSmoothVelocity = 0f;
     private CharacterController controller =  null;
     private Transform mainCameraTransform = null;
-    private float speedSmoothVelocity = 0f;
+    
+    //State bools
+    public bool walking, crouching, sprinting, standingInPlace;
+
+    //Velocity and gravity
+    [SerializeField] private float gravity = -9.81f;
+    private Vector3 velocity;
 
     //Sliding && dashing
     public float dashSpeed;
     public float dashTime;
-    public Vector3 moveDir;
+    private Vector3 moveDir;
 
+    //Cooldowns
+    private float dashCooldownTime = 2;
+    private float dashNextFireTime = 0;
+
+    //Animator
+    private Animator anim = null;
     private static readonly int hashSpeedPercentage = Animator.StringToHash("SpeedPercentage");
 
 #endregion
@@ -40,24 +52,78 @@ public class PlayerController : MonoBehaviour {
         Movement();
         HandleAnimations();
 
-        if(Input.GetKeyDown(KeyCode.LeftShift) && IsGrounded())
+        //Dash cooldown
+        if(Time.time > dashNextFireTime)
         {
-            StartCoroutine(Dash());
+            if(Input.GetKeyDown(KeyCode.LeftShift) && IsGrounded() && sprinting)
+            {
+                print("dash used");
+                dashNextFireTime = Time.time + dashCooldownTime;
+                StartCoroutine(Dash());
+            }
         }
+
+        //Lock cursor
+        if(lockCursor == true)
+            Cursor.lockState = CursorLockMode.Locked;
+        else
+            Cursor.lockState = CursorLockMode.None;
     }
 
     private void Movement() {
         Vector2 movementInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
+        
         Vector3 forward = mainCameraTransform.forward;
         Vector3 right = mainCameraTransform.right;
-        
         forward.y = 0f;
         right.y = 0f;
         forward.Normalize();
         right.Normalize();
         
         Vector3 desiredMoveDirection = (forward * movementInput.y + right * movementInput.x).normalized;
+        moveDir = desiredMoveDirection;
+        
         float currentSpeed = 0;
+
+        
+        //Reset gravity
+        if(IsGrounded() && velocity.y < 0)
+        {
+            velocity.y = 0f;
+        }
+       
+        //Walking
+        if(Input.GetKey(KeyCode.LeftControl) && IsGrounded()) {
+            walking = true;
+            anim.SetFloat(hashSpeedPercentage, 0.5f * movementInput.magnitude, speedSmoothTime, Time.deltaTime);
+        } else {
+            walking = false;
+            anim.SetFloat(hashSpeedPercentage, 1f * movementInput.magnitude, speedSmoothTime, Time.deltaTime);
+        }
+
+        //Crouching
+        if(Input.GetKey(KeyCode.C) && IsGrounded()) {
+            crouching = true;
+            anim.SetBool("crouching", true);
+        } else {
+            crouching = false;
+            anim.SetBool("crouching", false);
+        }
+
+        if(movementInput != Vector2.zero) {
+            sprinting = true;
+            standingInPlace = false;
+        } else {
+            standingInPlace = true;
+            sprinting = false;
+        }
+
+        //Moving state
+        if(walking || crouching) {
+            speed = walkSpeed;
+        } else if(sprinting) {
+            speed = sprintSpeed;
+        }
 
         //Rotate player and set speed
         if(desiredMoveDirection != Vector3.zero) {
@@ -65,32 +131,20 @@ public class PlayerController : MonoBehaviour {
         }
         float targetSpeed = speed * movementInput.magnitude;
         currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, speedSmoothTime);
-        //Reset gravity
-        if(IsGrounded() && velocity.y < 0)
-        {
-            velocity.y = 0f;
-        }
-        moveDir = desiredMoveDirection;
-        //Walking
-        if(Input.GetKey(KeyCode.LeftControl) && IsGrounded()) {
-            speed = walkSpeed;
-            anim.SetFloat(hashSpeedPercentage, 0.5f * movementInput.magnitude, speedSmoothTime, Time.deltaTime);
-        } else {
-            speed = sprintSpeed;
-            anim.SetFloat(hashSpeedPercentage, 1f * movementInput.magnitude, speedSmoothTime, Time.deltaTime);
-        }
-        
-        //Sprinting and walking
+
+        //Actually move
         controller.Move(desiredMoveDirection * currentSpeed * Time.deltaTime);
 
+        //Gravity
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
 
     }
     
     private void Jump() {       
-        if(IsGrounded()) {
+        if(IsGrounded() && !walking) {
             if(Input.GetKeyDown(KeyCode.Space)) {
+                //Jump
                 velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
             }
         }
@@ -102,11 +156,9 @@ public class PlayerController : MonoBehaviour {
 
         while(Time.time < startTime + dashTime)
         {
-            anim.SetBool("Dash", true);
             controller.Move(moveDir * dashSpeed * Time.deltaTime);
             yield return null;
         }
-        anim.SetBool("Dash", false);
     }
 
     private void HandleAnimations() {
