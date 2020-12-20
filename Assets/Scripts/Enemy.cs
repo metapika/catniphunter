@@ -4,10 +4,16 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    private int maxHealth = 100;
-    int currentHealth = 100;
+    private int maxHealth = 60;
+    int currentHealth = 60;
+
+    private MeshRenderer my_renderer;
+    public Material def;
+    public Material hitMat;
+
     void Start()
     {
+        my_renderer = GetComponent<MeshRenderer>();
         currentHealth = maxHealth;   
     }
 
@@ -15,7 +21,6 @@ public class Enemy : MonoBehaviour
     {
         currentHealth -= damage;
 
-        //play hurt
         if(currentHealth <= 0)
         {
             Die();
@@ -24,13 +29,20 @@ public class Enemy : MonoBehaviour
 
     private void Die()
     {
-        Debug.Log("Enemy Died!");
         Destroy(gameObject);
     }
+    
     private void OnTriggerEnter(Collider other) {
         if(other.CompareTag("Melee")) {
-            TakeDamage(30);
-            Debug.Log(" Enemy got hit! ");
+            if(my_renderer != null) {
+                my_renderer.material = hitMat;
+            }
+            Invoke("DefaultMaterial", 0.5f);
+            TakeDamage(20);
         }
+    }
+    
+    private void DefaultMaterial() {
+        my_renderer.material = def;
     }
 }
