@@ -16,8 +16,9 @@ public class PlayerPhysics : MonoBehaviour {
     private float gravityValue;
     [HideInInspector] public Vector3 velocity;
     [SerializeField] private float jumpRaycastDistance = 1f;
+    public LayerMask whatIsGround;
 
-    CharacterController controller;
+    public CharacterController controller;
     PlayerController player;
     Vector3 moveDirection;
     Vector3 activeGlobalPlatformPoint;
@@ -149,6 +150,6 @@ public class PlayerPhysics : MonoBehaviour {
     }
     
     public bool IsGrounded() {
-        return Physics.Raycast(transform.position, Vector3.down, jumpRaycastDistance);
+        return Physics.Raycast(transform.position, Vector3.down, jumpRaycastDistance, whatIsGround);
     }
 }

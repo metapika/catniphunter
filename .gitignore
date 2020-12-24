@@ -55,6 +55,9 @@ sysinfo.txt
 *.apk
 *.unitypackage
 
+# VERY IMPORTANT: THE ENEMY FILE IS TOO BIG, NEEDS IGNORING
+*/Assets/Animations/Enemy/ShortRange/enemy_idle.fbx
+
 # Crashlytics generated file
 crashlytics-build.properties
 

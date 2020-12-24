@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using DG.Tweening;
 
 public class PlayerCombat : MonoBehaviour {
@@ -8,30 +9,34 @@ public class PlayerCombat : MonoBehaviour {
     [SerializeField] private GameObject cutter;
     [SerializeField] private Transform swordCase;
     [SerializeField] private Transform swordHand;
-    
-    [Header("Combo")]
-    public int combonum;
-    public float reset;
-    public float resetTime;
-    public GameObject cam;
+    public CharacterStats stats;
+    private bool combo;
 
     [Header("Targets in radius")]
     public List<Transform> targets;
     public int targetIndex;
+    bool targetNotBehindCover = false;
+
+    [Header("Charged attack")]
+    public float chargeTimer = 0f;
+    public float chargeDestination = 2f;
+    public Slider chargeSlider;
+    public Image sliderFill;
     
     private CharacterController controller;
     private PlayerPhysics pphysics;
-    private PlayerController player;
-    private bool attacking;
+    public PlayerController player;
+    public GameObject cam;
+    private PlayerAbilities abilites;
     private Animator anim;
     private static readonly int hashSpeedPercentage = Animator.StringToHash("SpeedPercentage");
-    List<string> animList = new List<string>(new string[] {"animation1", "animation2", "animation3"});
     
     private void Start() {
         controller = GetComponent<CharacterController>();
         anim = GetComponent<Animator>();
         player = GetComponent<PlayerController>();
         pphysics = GetComponent<PlayerPhysics>();
+        abilites = GetComponent<PlayerAbilities>();
         
         cutter.GetComponent<BoxCollider>().enabled = false;
     }
@@ -39,54 +44,90 @@ public class PlayerCombat : MonoBehaviour {
     void Update()
     {
         //Targets
-        
         if (targets.Count > 0)
         {
-            targets.RemoveAll(enemy => enemy == null);
             targetIndex = NearestTargetToCenter();
-        }
-        
-        if(pphysics.IsGrounded()) {
-            //Combo
-            if(Input.GetButtonDown("Fire1") && combonum < 3) {
-                if(targets.Count != 0)
-                    if(transform.position.y - targets[targetIndex].position.y <= 1 && transform.position.y - targets[targetIndex].position.y >= -1)
-                    //if(Vector3.Distance(transform.position, targets[targetIndex].position) < )
-                        MoveTowardsTarget(targets[targetIndex]);
-                
-                anim.SetTrigger(animList[combonum]);
-                combonum++;
-                reset = 0f;
-            }
-            if(combonum > 0) {
-                reset += Time.deltaTime;
-                if(reset > resetTime) {
-                    anim.SetTrigger("Reset");
-                    combonum = 0;
-                }
-            }
-            if(combonum == 3) {
-                resetTime = 3f;
-                combonum = 0;
-            } else {
-                resetTime = 1f;
+            
+            RaycastHit hit;
+            Vector3 direction = targets[targetIndex].position - transform.position;     
+            Physics.Raycast(transform.position, direction, out hit, Vector3.Distance(transform.position, targets[targetIndex].position));
+
+            if(hit.transform != null)
+            {
+                if(hit.transform.gameObject.CompareTag("Enemy"))
+                    targetNotBehindCover = true;
+                else
+                    targetNotBehindCover = false;
             }
             
-            if (anim.GetCurrentAnimatorStateInfo(0).IsName("Q1_slash") || anim.GetCurrentAnimatorStateInfo(0).IsName("Q2_360") || anim.GetCurrentAnimatorStateInfo(0).IsName("Q3_air")){
-                attacking = true;
+            if(pphysics.IsGrounded())
+                if(transform.position.y - targets[targetIndex].position.y < 3 && transform.position.y - targets[targetIndex].position.y > -3)
+                    if(targetNotBehindCover)
+                        transform.LookAt(new Vector3(targets[targetIndex].position.x, transform.position.y, targets[targetIndex].position.z));
+        }
+        
+        chargeSlider.value = chargeTimer;
+        
+        //Combo & charged attack
+        if(Input.GetButton("Fire1")) {
+            EquipSword();
+            if(pphysics.IsGrounded())
+                chargeTimer += Time.deltaTime;
+        }
+        
+        if(Input.GetButtonUp("Fire1")) {
+            if(targets.Count != 0 && pphysics.IsGrounded())
+                    if(Vector3.Distance(transform.position, targets[targetIndex].position) > 4)
+                        if(targetNotBehindCover)
+                        MoveTowardsTarget(targets[targetIndex]);
+            
+            if(chargeTimer < chargeDestination) {
+                chargeTimer = 0;
+                if(pphysics.IsGrounded() && !abilites.blocking)
+                    Combo();
             } else {
-                attacking = false;
+                chargeTimer = 0;
+                if(pphysics.IsGrounded() && !abilites.blocking)
+                    anim.SetTrigger("chargedAttack");
             }
 
-            //Camera Lock on
-            if(attacking) {
-                EquipSword();
-                LockPlayer();
-            } else {
-                UnequipSword();
-                UnLockPlayer();
-            }
+            Color chargingColor = new Color(255f / 255f, 118f / 255f, 246f / 255f);
+            Color chargedColor = new Color(254f / 255f, 45f / 255f, 189f / 255f);
+            
+            if(chargeTimer <= chargeDestination / 2)
+                sliderFill.color = chargingColor;
+            if(chargeTimer >= chargeDestination)
+                sliderFill.color = chargedColor;
         }
+
+        if(Input.GetKeyDown(KeyCode.Q))
+            ThrowShurikens();
+        
+        if(Input.GetKeyDown(KeyCode.I)) {
+            EquipSword();
+        } else if (Input.GetKeyDown(KeyCode.O)) {
+            UnequipSword();
+        }
+    }
+
+    private void Combo() 
+    {
+        int attacknum = Random.Range(0, 2);
+        List<string> animList = new List<string>(new string[] {"slash1", "slash2"});
+        
+        if(!combo) {
+            anim.SetTrigger(animList[attacknum]);
+        }
+    }
+
+    private void ThrowShurikens()
+    {
+        Vector3 forward = cam.transform.forward;
+        forward.y = 0;
+        forward.Normalize();
+        
+        transform.LookAt(transform.position + forward);
+        anim.SetTrigger("ability1");
     }
     
     public void MoveTowardsTarget(Transform target)
@@ -95,7 +136,9 @@ public class PlayerCombat : MonoBehaviour {
         {
             anim.SetFloat(hashSpeedPercentage, 1f, 0.1f, Time.deltaTime);
             transform.DOMove(TargetOffset(), .5f);
-            transform.DOLookAt(targets[targetIndex].position, .2f);
+            if(pphysics.IsGrounded())
+            if(transform.position.y - targets[targetIndex].position.y < 3 && transform.position.y - targets[targetIndex].position.y > -3)
+                transform.DOLookAt(new Vector3(targets[targetIndex].position.x, transform.position.y, targets[targetIndex].position.z), .2f);
         }
     }
     
@@ -103,7 +146,7 @@ public class PlayerCombat : MonoBehaviour {
     {
         Vector3 position;
         position = targets[targetIndex].position;
-        return Vector3.MoveTowards(position, transform.position, 1f);
+        return Vector3.MoveTowards(position, transform.position, 1.2f);
     }
     
     private int NearestTargetToCenter()
@@ -129,32 +172,31 @@ public class PlayerCombat : MonoBehaviour {
     public void SelectTarget(int index)
     {
         targetIndex = index;
+        if(pphysics.IsGrounded())
+            if(transform.position.y - targets[targetIndex].position.y < 3 && transform.position.y - targets[targetIndex].position.y > -3)
+                transform.DOLookAt(new Vector3(targets[targetIndex].position.x, transform.position.y, targets[targetIndex].position.z), .3f).SetUpdate(true);
     }
     
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Enemy"))
-        {
-            targets.Add(other.transform);
+        if(other.CompareTag("Fist")) {
+            stats.TakeDamage(other.transform.root.GetComponent<CharacterStats>().characterDefinition.baseDamage);
+            anim.SetTrigger("hit");
         }
-    }   
-    
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Enemy"))
-        {
-            if (targets.Contains(other.transform))
-                targets.Remove(other.transform);
+        
+        if(other.gameObject.CompareTag("Bullet")) {
+            if(other.gameObject.GetComponent<Missile>()) {
+                stats.TakeDamage(other.GetComponent<Missile>().bulletDamage);
+                other.gameObject.GetComponent<Missile>().DestroyMissile();
+            }
+            else {
+                stats.TakeDamage(other.GetComponent<BulletBase>().bulletDamage);
+                Destroy(other.gameObject);
+            }
+            anim.SetTrigger("hit");
         }
-    }
+    }  
 
-    private void LockPlayer() {
-        //transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, Camera.main.transform.localEulerAngles.y, transform.localEulerAngles.z);
-        player.canMove = false;
-    }
-    private void UnLockPlayer() {
-        player.canMove = true;
-    }
     public void EnableCutter()
     {
         cutter.GetComponent<BoxCollider>().enabled = true;
@@ -175,5 +217,13 @@ public class PlayerCombat : MonoBehaviour {
         cutter.transform.SetParent(swordHand);
         cutter.transform.position = swordHand.position;
         cutter.transform.rotation = swordHand.rotation;
+    }
+
+    public void StartCombo() {
+        combo = true;
+    }
+
+    public void StopCombo() {
+        combo = false;
     }
 }

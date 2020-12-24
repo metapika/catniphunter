@@ -5,17 +5,17 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour {
 
 #region Variables
-    public bool lockCursor;
     [SerializeField] private bool enableDoubleJump = true;
     
     [Header("Movement Variables")]
     [SerializeField] private float speed;
-    [SerializeField] private float walkSpeed = 10f;
+    [SerializeField] private float crouchSpeed = 10f;
     [SerializeField] private float sprintSpeed = 30f;
     [SerializeField] private float wallDetectionDistance = 1;
     [SerializeField] private LayerMask whatIsEnv;
     private float speedSmoothTime = 0.1f;
-    public bool canMove = true;
+    public bool canMove;
+    public Transform mainCameraTransform = null;
     
     [Header("Jumping Variables")]
     [SerializeField] private float jumpForce = 5f;
@@ -23,7 +23,6 @@ public class PlayerController : MonoBehaviour {
     [SerializeField] private float doubleJumpForce = 3f;
 
     [Header("State boolions")]
-    public bool walking;
     public bool crouching;
     public bool sprinting;
 
@@ -34,17 +33,10 @@ public class PlayerController : MonoBehaviour {
     [SerializeField] private float slopeForceRayLength;
     private bool isJumping;
 
-    [Header("Wallbounce")]
-    public Transform orientation;
-    public LayerMask whatIsWall;
-    [SerializeField] private float bounceForce = 10f;
-    [SerializeField] private float wallRayDetect = 10f;
-    public bool isWallRight, isWallLeft;
-
     //Stuff
     private CharacterController controller =  null;
+    private PlayerCombat combat = null;
     private PlayerPhysics pphysics = null;
-    private Transform mainCameraTransform = null;
     
     //Animator
     private Animator anim = null;
@@ -56,24 +48,19 @@ public class PlayerController : MonoBehaviour {
     private void Awake() {
         controller = GetComponent<CharacterController>();
         pphysics = GetComponent<PlayerPhysics>();
+        combat = GetComponent<PlayerCombat>();
         anim = GetComponent<Animator>();
-        mainCameraTransform = Camera.main.transform;
+        
+        speed = sprintSpeed;
     }
     
     private void Update() {
         DontRunWhenWall();
-        CheckWall();
         HandleAnimations();
         if(canMove) {
             Movement();
             Jumping();
         }
-
-        //Lock cursor
-        if(lockCursor == true)
-            Cursor.lockState = CursorLockMode.Locked;
-        else
-            Cursor.lockState = CursorLockMode.None;
     }
 
     private void Movement() {
@@ -89,22 +76,16 @@ public class PlayerController : MonoBehaviour {
         Vector3 desiredMoveDirection = (forward * movementInput.y + right * movementInput.x).normalized;
         moveDir = desiredMoveDirection;
         
-        //Walking
-        if(Input.GetKey(KeyCode.LeftControl) && pphysics.IsGrounded()) {
-            walking = true;
-            anim.SetFloat(hashSpeedPercentage, 0.5f * movementInput.magnitude, speedSmoothTime, Time.deltaTime);
-        } else {
-            walking = false;
-            if(!IsFacingAWall())
-            anim.SetFloat(hashSpeedPercentage, 1f * movementInput.magnitude, speedSmoothTime, Time.deltaTime);
-        }
-
         //Crouching
-        if(Input.GetKey(KeyCode.C) && pphysics.IsGrounded()) {
+        if(Input.GetKey(KeyCode.C) && pphysics.IsGrounded() && movementInput != Vector2.zero) {
             crouching = true;
+            speed = crouchSpeed;
             anim.SetBool("crouching", true);
-        } else {
+        }
+        
+        if(Input.GetKeyUp(KeyCode.C) || movementInput == Vector2.zero) {
             crouching = false;
+            speed = sprintSpeed;
             anim.SetBool("crouching", false);
         }
 
@@ -113,11 +94,6 @@ public class PlayerController : MonoBehaviour {
             sprinting = true;
         } else {
             sprinting = false;
-        }
-        if(walking || crouching || IsFacingAWall()) {
-            speed = walkSpeed;
-        } else if(sprinting) {
-            speed = sprintSpeed;
         }
 
         //Rotate player and set speed
@@ -134,6 +110,8 @@ public class PlayerController : MonoBehaviour {
 
         if ((movementInput.y != 0 || movementInput.x != 0) && OnSlope())
             controller.Move(Vector3.down * controller.height / 2 * slopeForce * Time.deltaTime);
+        
+        anim.SetFloat(hashSpeedPercentage, 1f * movementInput.magnitude, speedSmoothTime, Time.deltaTime);
     }
 
     private bool OnSlope()
@@ -150,7 +128,7 @@ public class PlayerController : MonoBehaviour {
     }
     
     private void Jumping() {       
-        if(pphysics.IsGrounded() && !walking) {
+        if(pphysics.IsGrounded() && !crouching) {
             
             canDoubleJump = true;
             if(Input.GetKeyDown(KeyCode.Space)) {
@@ -158,25 +136,10 @@ public class PlayerController : MonoBehaviour {
                 pphysics.velocity.y = Mathf.Sqrt(jumpForce * -2f * pphysics.gravity);
             }
         } else {
-            if(Input.GetKeyDown(KeyCode.Space) && canDoubleJump && enableDoubleJump && !isWallRight && !isWallLeft) {
+            if(Input.GetKeyDown(KeyCode.Space) && canDoubleJump && enableDoubleJump) {
                 //Jump
                 pphysics.velocity.y = Mathf.Sqrt(doubleJumpForce * -2f * pphysics.gravity);
                 canDoubleJump = false;
-            }
-        }
-    }
-    
-    void CheckWall() {
-        isWallRight = Physics.Raycast(transform.position, orientation.right, wallRayDetect, whatIsWall);
-        isWallLeft = Physics.Raycast(transform.position, -orientation.right, wallRayDetect, whatIsWall);
-    }
-
-    void WallBounce() {
-        if(Input.GetKeyDown(KeyCode.Space)) {
-            if(isWallRight && !pphysics.IsGrounded()) {
-                pphysics.velocity += orientation.right * Mathf.Sqrt(bounceForce * -2f * pphysics.gravity);;
-            } else if(isWallLeft && !pphysics.IsGrounded()) {
-                pphysics.velocity += -orientation.right * Mathf.Sqrt(bounceForce * -2f * pphysics.gravity);;
             }
         }
     }
@@ -201,7 +164,7 @@ public class PlayerController : MonoBehaviour {
     }
     
     private bool IsFacingAWall() {
-        return Physics.Raycast(transform.position, transform.forward, wallDetectionDistance);
+        return Physics.Raycast(transform.position, transform.forward, wallDetectionDistance, whatIsEnv);
     }
 #endregion
 }
