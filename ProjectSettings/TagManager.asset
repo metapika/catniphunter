@@ -12,6 +12,9 @@ TagManager:
   - HealthPack
   - Bullet
   - Sentry
+  - Electric
+  - Shuriken
+  - Shield
   layers:
   - Default
   - TransparentFX
@@ -27,9 +30,9 @@ TagManager:
   - Enemies
   - EnemyDetection
   - Bullet
-  - 
-  - 
-  - 
+  - ParticleSystem
+  - Shield
+  - Wall
   - 
   - 
   - 

@@ -1,5 +1,26 @@
 {
   "dependencies": {
+    "com.coffee.softmask-for-ugui": {
+      "version": "https://github.com/mob-sakai/SoftMaskForUGUI.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "5c54622518b193e917239d66e12fd6e5516db31d"
+    },
+    "com.coffee.unmask": {
+      "version": "https://github.com/mob-sakai/UnmaskForUGUI.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "8b0ec8b950bd51a91ed22974783dc0e9f74a381d"
+    },
+    "com.kink3d.shading": {
+      "version": "https://github.com/Kink3d/kShading.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "9e583feccff7d2e4517ef454b7027e3072faf240"
+    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,
@@ -83,7 +104,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.postprocessing": {
-      "version": "2.3.0",
+      "version": "3.0.1",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -193,6 +214,23 @@
         "com.unity.modules.ui": "1.0.0",
         "com.unity.modules.imgui": "1.0.0"
       }
+    },
+    "com.unityfx.outline": {
+      "version": "0.8.3",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://registry.npmjs.org"
+    },
+    "com.unityfx.outline.urp": {
+      "version": "0.3.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unityfx.outline": "0.8.3",
+        "com.unity.render-pipelines.universal": "7.0.0"
+      },
+      "url": "https://registry.npmjs.org"
     },
     "com.unity.modules.ai": {
       "version": "1.0.0",

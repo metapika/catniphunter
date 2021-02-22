@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57d0c11168277cf4eb3b4b89706e6aa5, type: 3}
+  m_Name: PlayerOutline
+  m_EditorClassIdentifier: 
+  _layers:
+  - _settings:
+      _outlineSettings: {fileID: 11400000, guid: 1590f53a7ad696536b17f1f0669a7cf8, type: 2}
+      _outlineColor: {r: 0, g: 0, b: 0, a: 1}
+      _outlineWidth: 3
+      _outlineIntensity: 64
+      _outlineAlphaCutoff: 0.9
+      _outlineMode: 2
+    _name: Player Outline
+    _enabled: 1
+    _mergeLayerObjects: 0
+  _ignoreLayerMask: 16319
