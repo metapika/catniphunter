@@ -10,8 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4625873719187200228}
   - component: {fileID: 5737704439726508550}
+  - component: {fileID: 903834955355153880}
   m_Layer: 9
-  m_Name: ShurikenAbility
+  m_Name: Shuriken
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44,7 +45,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ecdf77c8096c4cfeb90f9da87eaef46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cooldownSystem: {fileID: 0}
   shurikenSpawnPoint: {fileID: 5011930116478486195}
   shuriken: {fileID: 3333333082401079480, guid: 0b3055392ceb63a4ba8583d75fb7019a, type: 3}
   abilityId: 1
@@ -54,6 +54,19 @@ MonoBehaviour:
   shurikenForce: 50
   shurikenSlider: {fileID: 0}
   shurikenCountdownText: {fileID: 0}
+--- !u!114 &903834955355153880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3611717327037163720}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 227d1230c8064fe8fb0983af510fb9a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ID: 3
 --- !u!1 &5011930116478486204
 GameObject:
   m_ObjectHideFlags: 0

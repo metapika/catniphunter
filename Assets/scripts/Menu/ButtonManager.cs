@@ -12,6 +12,7 @@ namespace UnityCore {
             private PageController PageController;
             public SceneController SceneController;
             public PauseMenu PauseMenu;
+            public GameObject menuOnly;
 
             void Start()
             {
@@ -25,7 +26,7 @@ namespace UnityCore {
                 PageController.TurnPageOff(PageType.ModeSelect, PageType.SaveSelect);
             }
             public void CharacterCustomizer() {
-                GameObject.Find("Menu Only").SetActive(false);
+                menuOnly.SetActive(false);
                 PageController.TurnPageOff(PageType.MainMenu, PageType.Customize);
             }
             public void LoadIntoGame() {

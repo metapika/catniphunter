@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 public class ShieldAbility : MonoBehaviour
 {
-    [Header("Shield Variables")]
     public GameObject shield;
     private Shield shieldBehavior;
     public bool blocking;
@@ -12,40 +11,44 @@ public class ShieldAbility : MonoBehaviour
     private Animator playerAnim;
     private Animator shieldAnim;
     private PlayerController player;
+    private PlayerCombat combat;
     public BoxCollider col;
 
     private void Awake() {
         pphysics = transform.root.gameObject.GetComponent<PlayerPhysics>();
         player = transform.root.gameObject.GetComponent<PlayerController>();
+        combat = transform.root.gameObject.GetComponent<PlayerCombat>();
         playerAnim = transform.root.gameObject.GetComponent<Animator>();
         shieldBehavior = shield.GetComponent<Shield>();
         shieldAnim = shield.GetComponent<Animator>();
 
-        shieldBehavior.shield.SetActive(false);
+        shieldBehavior.gfx.SetActive(false);
     }
 
     private void Update() {
-        if(Input.GetButton("Fire2") && pphysics.IsGrounded())
-            if(shieldBehavior.shieldCurrentHealth > shieldBehavior.shieldMaxHealth / 2 || blocking)
-                Shield();
-        if(Input.GetButtonUp("Fire2"))
+        if(Input.GetButton("Shield") && pphysics.IsGrounded())
+        {
+            Shield();
+        } else if(Input.GetButtonUp("Shield"))
+        {
             DisableShield();
+        }
     }
-
     private void Shield() {
         playerAnim.SetBool("blocking", true);
         shieldAnim.SetBool("blocking", true);
 
-        shieldBehavior.shield.SetActive(true);
+        shieldBehavior.gfx.SetActive(true);
         col.enabled = true;
         blocking = true;
-        
-        Vector3 forward = Camera.main.transform.forward;
-        forward.y = 0;
-        forward.Normalize();
-        
-        transform.root.LookAt(transform.root.position + forward);
-        //player.canMove = false;
+        if(combat.targets.Count == 0)
+        {
+            Vector3 forward = Camera.main.transform.forward;
+            forward.y = 0;
+            forward.Normalize();
+            
+            transform.root.LookAt(transform.root.position + forward);
+        }
     }
 
     public void DisableShield() {
@@ -53,6 +56,5 @@ public class ShieldAbility : MonoBehaviour
         shieldAnim.SetBool("blocking", false);
         col.enabled = false;
         blocking = false;
-        //player.canMove = true;
     }
 }

@@ -1,12 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 using System.Linq;
 
 public class SpiderSight : MonoBehaviour
 {
-    public LayerMask whatIsGround, whatIsPlayer;
+    public LayerMask whatIsPlayer;
+    public LayerMask coverDetectionMask;
     public float sightRange, attackRange;
     public bool playerInSightRange, playerInAttackRange, playerNotBehindCover, justSawPlayer;
     private Transform player;
@@ -21,25 +21,20 @@ public class SpiderSight : MonoBehaviour
     private void DetectPlayer() {
         playerInSightRange = Physics.CheckSphere(transform.position, sightRange, whatIsPlayer);
         playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, whatIsPlayer);
-
-        if(player != null) {
-            RaycastHit hit;
-            Vector3 direction = player.transform.position - transform.position;     
-            
-            if(Physics.Raycast(transform.position, direction, out hit, Vector3.Distance(transform.position, player.position) + 5f))
+        
+        Vector3 direction = player.transform.position - transform.position;     
+        RaycastHit hit;
+        
+        if(Physics.Raycast(transform.position, direction, out hit, Vector3.Distance(transform.position, player.position) + 5f, coverDetectionMask))
+        {
+            if(hit.transform.gameObject.CompareTag("Player") || hit.transform.gameObject.CompareTag("Shield")) 
             {
-                if(hit.transform.gameObject.CompareTag("Player")) 
-                {
-                    if(!justSawPlayer && playerInSightRange)
-                    {
-                        justSawPlayer = true;
-                    }
-
-                    playerNotBehindCover = true;
-                }
-                else {
-                    playerNotBehindCover = false;
-                }
+                playerNotBehindCover = true;
+                justSawPlayer = true;
+            }
+            else
+            {
+                playerNotBehindCover = false;
             }
         }
     }

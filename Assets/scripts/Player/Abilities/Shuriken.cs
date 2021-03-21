@@ -7,13 +7,12 @@ public class Shuriken : MonoBehaviour
     [HideInInspector] public float rotationSpeed;
     [HideInInspector] public float shurikenForce;
     private Rigidbody rb;
-    private Transform model;
+    public Transform model;
     public Transform target;
     public float shurikenRemoveTime = 10f;
 
     private void Start() {
         rb = GetComponent<Rigidbody>();
-        model = transform.Find("model");
         StartCoroutine(DestroyShuriken());
     }
 

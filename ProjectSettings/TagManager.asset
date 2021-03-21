@@ -4,17 +4,25 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Melee
   - MovingPlatform
   - BouncePad
-  - Enemy
-  - Fist
   - HealthPack
   - Bullet
-  - Sentry
   - Electric
   - Shuriken
   - Shield
+  - Weapon
+  - WeaponHolder
+  - Enemy
+  - WeaponPad
+  - Ability
+  - CameraTarget
+  - Melee
+  - Knife
+  - PressurePad
+  - Bouncable
+  - Cargo
+  - VentOpening
   layers:
   - Default
   - TransparentFX
@@ -33,8 +41,8 @@ TagManager:
   - ParticleSystem
   - Shield
   - Wall
-  - 
-  - 
+  - WeaponPad
+  - Weapon
   - 
   - 
   - 

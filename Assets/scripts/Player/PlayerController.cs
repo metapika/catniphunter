@@ -2,156 +2,127 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour {
-
-#region Variables
-    [Header("Movement Variables")]
-    [SerializeField] private float speed;
-    [SerializeField] private float crouchSpeed = 10f;
-    [SerializeField] private float sprintSpeed = 30f;
-    [SerializeField] private float wallDetectionDistance = 1;
+public class PlayerController : MonoBehaviour
+{
+    #region Fields
     [SerializeField] private LayerMask whatIsEnv;
-    private float speedSmoothTime = 0.1f;
-    public bool canMove;
-    public Transform mainCameraTransform = null;
-    public ParticleSystem dust;
-    
-    [Header("Jumping Variables")]
-    [SerializeField] private float jumpForce = 5f;
-    [SerializeField] private bool canDoubleJump = false;
-    [SerializeField] private float doubleJumpForce = 3f;
-    private bool canJumpWithoutBeingOnTheGround = true;
-    private bool jumpWasPressed = false;
-
-    [Header("State boolions")]
-    public bool crouching;
-    public bool sprinting;
+    [SerializeField] private float slopeForce = 13f;
+    [SerializeField] private float slopeForceRayLength = 1.2f;
+    private bool isJumping;
+    private float originalHeight;
+    [SerializeField] private Vector3 originalCenter;
 
     [HideInInspector] public Vector3 moveDir;
-
-    [Header("Slopes")]
-    [SerializeField] private float slopeForce;
-    [SerializeField] private float slopeForceRayLength;
-    private bool isJumping;
-
-    [Header("Wallrun mechanic")]
-    public float wallRunRayDistance = 2;
-    public LayerMask whatIsWall;
-    public float wallrunSpeed = 20;
-    public float wallJumpoffForce = 50;
-    public Vector3 calculatedRunningDirection;
-    bool runnableWallLeft, runnableWallRight;
-    bool isWallrunning;
-    Vector3 wallNormalDirection;
-    Transform body;
-
-    // [Header("Pause Menu Pose")]
-    // public Transform ctvPosition;
-    // public float lookAtCtv = 0f;
-    // public float lookAtCtvRot = 0f;
-
-    //Stuff
-    [HideInInspector] public CharacterController controller =  null;
-    private PlayerCombat combat = null;
-    private PlayerPhysics pphysics = null;
-    
-    //Animator
-    private Animator anim = null;
+    [HideInInspector] public CharacterController controller;
+    private float speedSmoothTime = 0.1f;
+    private bool jumpWasPressed;
+    private bool canJumpNoGrounded;
+    private bool canDoubleJump;
+    private PlayerStats stats;
+    private PlayerPhysics pphysics;
+    private PlayerCombat combat;
+    private Animator anim;
     private static readonly int hashSpeedPercentage = Animator.StringToHash("SpeedPercentage");
+    public MoneyManager money;
+    
+    #endregion
 
-#endregion
-
-#region Private Functions
-    private void Awake() {
+    #region Unity Functions
+    void Awake() {
         controller = GetComponent<CharacterController>();
+        stats = GetComponent<PlayerStats>();
         pphysics = GetComponent<PlayerPhysics>();
         combat = GetComponent<PlayerCombat>();
         anim = GetComponent<Animator>();
-        body = transform.Find("GFX");
-        
-        speed = sprintSpeed;
+
+        originalHeight = controller.height;
+        originalCenter = controller.center;
+
+        money = MoneyManager.singleton;
     }
-    
-    private void Update() {
-        DontRunWhenWall();
-        HandleAnimations();
+
+    void Update() {
         if(canMove) {
             Movement();
             Jumping();
-            CheckForWalls();
-            WallrunInput();
+        }
+        
+        HandleAnimations();
+
+        if(Input.GetKeyDown(KeyCode.L)) {
+            money.AddMoney(100);
+        } else if(Input.GetKeyDown(KeyCode.K)) {
+            money.RemoveMoney(100);
         }
 
-        if(Input.GetKeyDown(KeyCode.F)) {
-            FindObjectOfType<DialogueManager>().DisplayNextSentence();
-        }
+        pphysics.controllerVelocity.x = controller.velocity.x;
+        pphysics.controllerVelocity.z = controller.velocity.z;
     }
 
+    #endregion
+
+    #region Custom Functions
+    public bool canRotate = true;
+    public bool canMove = true;
+    bool crouching = false;
     private void Movement() {
         Vector2 movementInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
         
-        Vector3 forward = mainCameraTransform.forward;
-        Vector3 right = mainCameraTransform.right;
+        Vector3 forward = Camera.main.transform.forward;
+        Vector3 right = Camera.main.transform.right;
         forward.y = 0f;
         right.y = 0f;
         forward.Normalize();
         right.Normalize();
-        
+
         Vector3 desiredMoveDirection = (forward * movementInput.y + right * movementInput.x).normalized;
         moveDir = desiredMoveDirection;
-        
-        //Crouching
-        if(Input.GetKey(KeyCode.C) && pphysics.IsGrounded() && movementInput != Vector2.zero) {
-            crouching = true;
-            speed = crouchSpeed;
-            anim.SetBool("crouching", true);
-        }
-        
-        if(Input.GetKeyUp(KeyCode.C)) {
-            crouching = false;
-            speed = sprintSpeed;
-            anim.SetBool("crouching", false);
-        }
 
-        //Moving state
-        if(movementInput != Vector2.zero) {
-            sprinting = true;
-        } else {
-            sprinting = false;
-        }
+        if(pphysics.IsGrounded()) {
+            if(Input.GetButtonDown("Crouch")) {
+                if(crouching)
+                {
+                    Ray crouchRay = new Ray(transform.position + Vector3.up * controller.radius * 0.5f, Vector3.up);
+                    float crouchRayLength = originalHeight - controller.radius * 0.5f;
+                    if (Physics.SphereCast(crouchRay, controller.radius * 0.5f, crouchRayLength, Physics.AllLayers, QueryTriggerInteraction.Ignore))
+                    {
+                        crouching = true;
+                        return;
+                    }
+                    controller.height = originalHeight;
+                    controller.center = originalCenter;
 
-        if(movementInput != Vector2.zero && pphysics.IsGrounded()) {
-            CreateDust();
-        }
+                    crouching = false;
 
-        //Rotate player and set speed
-        if(!isWallrunning) {
-            if(desiredMoveDirection != Vector3.zero && combat.targets.Count <= 0) 
-            {
-                if(transform.Find("CurrentAbilities").Find("Shield(Clone)") != null) {
-                    if(!transform.Find("CurrentAbilities").Find("Shield(Clone)").gameObject.GetComponent<ShieldAbility>().blocking)
-                        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(desiredMoveDirection), 0.2f);
-                } else {
-                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(desiredMoveDirection), 0.2f);
+                    stats.ChangeSpeed(stats.sprintSpeed);
+                    anim.SetBool("crouching", false);
+                }
+                else
+                {
+                    crouching = true;
+                    controller.height = 1.3f;
+                    controller.center = new Vector3(0f, -0.15f, 0f);
+                    stats.ChangeSpeed(stats.crouchSpeed);
+                    anim.SetBool("crouching", true);
                 }
             }
         }
-        
-        float currentSpeed = 0;
-        float targetSpeed = speed * movementInput.magnitude;
-        currentSpeed = Mathf.Lerp(0, targetSpeed, speedSmoothTime);
 
-        //Actually move
-        if(!isWallrunning) {
-            controller.Move(desiredMoveDirection * currentSpeed * Time.deltaTime);
+        float calculatedSpeed = 0;
+        float targetSpeed = stats.currentSpeed * movementInput.magnitude;
+        calculatedSpeed = Mathf.Lerp(0, targetSpeed, speedSmoothTime);
+
+        if(canRotate && desiredMoveDirection != Vector3.zero) {
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(desiredMoveDirection), 0.2f);
+        }
+        controller.Move(desiredMoveDirection * calculatedSpeed * Time.deltaTime);
+
+        if ((movementInput.y != 0 || movementInput.x != 0) && OnSlope()) {
+            controller.Move(Vector3.down * controller.height / 2 * slopeForce * Time.deltaTime);
         }
 
-        if ((movementInput.y != 0 || movementInput.x != 0) && OnSlope())
-            controller.Move(Vector3.down * controller.height / 2 * slopeForce * Time.deltaTime);
-        
         anim.SetFloat(hashSpeedPercentage, 1f * movementInput.magnitude, speedSmoothTime, Time.deltaTime);
     }
-
     private bool OnSlope()
     {
         if (isJumping)
@@ -165,76 +136,21 @@ public class PlayerController : MonoBehaviour {
         return false;
     }
 
-    private void WallrunInput() 
-    {
-        if(runnableWallRight || runnableWallLeft)
-            if(Input.GetKey(KeyCode.W)) {
-                StartWallRun();
-            }
-        anim.SetBool("isWallrunning", isWallrunning);
-    }
-
-    private void StartWallRun()
-    {
-        isWallrunning = true;
-        pphysics.useGravity = false;
-
-        //transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(calculatedRunningDirection), 0.2f);
-        controller.Move(calculatedRunningDirection * wallrunSpeed * Time.deltaTime);
-
-        if(runnableWallRight)
-            pphysics.AddImpact(transform.right, wallrunSpeed / 5 * Time.deltaTime);
-        else
-            pphysics.AddImpact(-transform.right, wallrunSpeed / 5 * Time.deltaTime);
-    }
-
-    private void StopWallRun()
-    {
-        pphysics.useGravity = true;
-        isWallrunning = false;
-    }
-
-    void CheckForWalls()
-    {
-        RaycastHit right, left;
-
-        Physics.Raycast(transform.position, transform.right, out right, wallRunRayDistance, whatIsWall);
-        Physics.Raycast(transform.position, -transform.right, out left, wallRunRayDistance, whatIsWall);
-        
-        if(right.collider != null) {
-            runnableWallRight = Vector3.Dot(right.normal, Vector3.up) == 0;
-            calculatedRunningDirection = Vector3.Cross(right.normal, Vector3.up) * -1;
-            wallNormalDirection = right.normal;
-        } else 
-            runnableWallRight = false;
-
-        if(left.collider != null) {
-            runnableWallLeft = Vector3.Dot(left.normal, Vector3.up) == 0;
-            calculatedRunningDirection = Vector3.Cross(left.normal, Vector3.up);
-            wallNormalDirection = left.normal;
-        } else 
-            runnableWallLeft = false;
-
-        if(!runnableWallLeft && !runnableWallRight) StopWallRun();
-        if(runnableWallLeft || runnableWallRight)
-            canDoubleJump = true;
-    }
-
     private void Jumping() {
         if(Input.GetKeyDown(KeyCode.Space)) 
         {
             jumpWasPressed = true;
             StartCoroutine(RememberJumpTime());
-            if(canJumpWithoutBeingOnTheGround)
+            if(canJumpNoGrounded)
             {
-                pphysics.velocity.y = Mathf.Sqrt(jumpForce * -2f * pphysics.gravity);
+                pphysics.velocity.y = Mathf.Sqrt(stats.jumpForce * -2f * pphysics.currentGravity);
             }
         }
         
-        if(Input.GetKeyDown(KeyCode.Space) && canDoubleJump && !canJumpWithoutBeingOnTheGround) 
+        if(Input.GetKeyDown(KeyCode.Space) && canDoubleJump && !canJumpNoGrounded) 
         {
             canDoubleJump = false;
-            pphysics.velocity.y = Mathf.Sqrt(doubleJumpForce * -2f * pphysics.gravity);
+            pphysics.velocity.y = Mathf.Sqrt(stats.doubleJumpForce * -2f * pphysics.currentGravity);
         }
         
         if(!pphysics.IsGrounded())
@@ -245,33 +161,22 @@ public class PlayerController : MonoBehaviour {
         if(pphysics.IsGrounded())
         {
             canDoubleJump = true;
-            canJumpWithoutBeingOnTheGround = true;
+            canJumpNoGrounded = true;
             if(jumpWasPressed)
             {
-                pphysics.velocity.y = Mathf.Sqrt(jumpForce * -2f * pphysics.gravity);
-            }
-        }  
-
-        if(isWallrunning)
-        {
-            if(Input.GetKeyDown(KeyCode.Space)) {
-                StopWallRun();
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(wallNormalDirection), 0.2f);
-                pphysics.AddImpact(wallNormalDirection + Vector3.up, wallJumpoffForce);
+                pphysics.velocity.y = Mathf.Sqrt(stats.jumpForce * -2f * pphysics.currentGravity);
             }
         }  
     }
 
     private IEnumerator CoyoteTime() {
         yield return new WaitForSeconds(.1f);
-        canJumpWithoutBeingOnTheGround = false;
+        canJumpNoGrounded = false;
     }
-
     private IEnumerator RememberJumpTime() {
         yield return new WaitForSeconds(.1f);
         jumpWasPressed = false;
     }
-
     private void HandleAnimations() {
         if (pphysics.IsGrounded() == false) {
             anim.SetBool("isGrounded", false);
@@ -283,20 +188,5 @@ public class PlayerController : MonoBehaviour {
             anim.SetFloat("velocityY", 0);
         }
     }
-    
-    private void DontRunWhenWall() {
-        Vector2 movementInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
-        
-        if(IsFacingAWall())
-            anim.SetFloat(hashSpeedPercentage, 0.4f * movementInput.magnitude, speedSmoothTime, Time.deltaTime);
-    }
-    
-    private bool IsFacingAWall() {
-        return Physics.Raycast(transform.position, transform.forward, wallDetectionDistance, whatIsEnv);
-    }
-
-    void CreateDust() {
-        dust.Play();
-    }
-#endregion
+    #endregion
 }

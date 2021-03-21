@@ -39,12 +39,5 @@ public class DialogueManager : MonoBehaviour
     void EndDialogue()
     {
         dialogueText.transform.parent.parent.GetComponent<Animator>().SetTrigger("end");
-
-        DecisionTrigger decision = null; 
-
-        if(GetComponent<DecisionTrigger>() != null) {
-            decision = GetComponent<DecisionTrigger>();
-            decision.TriggerDecision();
-        }
     }
 }

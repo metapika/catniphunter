@@ -7,10 +7,9 @@ public class SpiderStats : MonoBehaviour
     public int maxHealth = 50;
     public int currentHealth = 0;
     public GameObject hitText;
-    public int minDamage = 12;
-    public int maxDamage = 15;
-    public int currentDamage = 0;
-    public bool confused;
+    public int damage = 5;
+    public bool gettingKnockbacked = false;
+    public float knockbackTime = 0.3f;
     public float confusionTime = 10f;
     public ParticleSystem confusionParticles;
 
@@ -23,8 +22,6 @@ public class SpiderStats : MonoBehaviour
 
     void Update()
     {
-        RandomizeDamage();
-
         if (currentHealth <= 0)
         {
             Die();
@@ -34,10 +31,6 @@ public class SpiderStats : MonoBehaviour
         if(other.CompareTag("Shuriken"))
         {
             //StartCoroutine(Confusion());
-        }
-
-        if(other.CompareTag("Melee")) {
-            TakeDamage(20);
         }
     }
     public void TakeDamage(int amount)
@@ -50,12 +43,26 @@ public class SpiderStats : MonoBehaviour
         Instantiate(hitText, transform.position, Quaternion.identity);
         hitText.GetComponent<TextMesh>().text = amount;
     }
-    public void RandomizeDamage() {
-        currentDamage = Random.Range(minDamage, maxDamage);
-    }
     private void Die()
     {
         player.GetComponent<PlayerCombat>().targets.Remove(this.gameObject.transform);
         gameObject.SetActive(false);
+    }
+    public IEnumerator Knockback(Transform pos, float knockbackStrenght)
+    {
+        gettingKnockbacked = true;
+
+        Rigidbody rb = GetComponent<Rigidbody>();
+        UnityEngine.AI.NavMeshAgent agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+
+        rb.isKinematic = false;
+        agent.enabled = false;
+
+        yield return new WaitForSeconds(knockbackTime);
+
+        rb.isKinematic = true;
+        agent.enabled = true;
+
+        gettingKnockbacked = false;
     }
 }

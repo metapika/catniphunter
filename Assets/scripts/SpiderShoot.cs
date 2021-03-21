@@ -4,40 +4,89 @@ using UnityEngine;
 
 public class SpiderShoot : MonoBehaviour
 {
+    [HideInInspector] public enum EnemyType {
+        BurstBlaster,
+        HeavyMissile
+    }
+    public EnemyType enemyType;
+    public Transform player;
+    [Space]
+    public GameObject blasterProjectile;
+    public GameObject missileProjectile;
+    public Transform rifle, rifle2, gunPoint, gunPoint2;
+    public GameObject shootingParticles;
+    [Space]
+    public int damage = 5;
+    public int burstShots = 3;
+    public float timeBetweenBursts = 0.2f;
+    public float timeBetweenAttacks = 1.1f;
+    [Space]
+    public bool canShoot = true;
+
     private SpiderSight sight;
-    private Transform player;
-    public GameObject projectile;
-    public Transform gunPoint, gunPoint2;
-    public Transform gun, gun2;
-    public int magazineSize;
-    public float timeBetweenAttacks, reloadTime;
-    bool alreadyAttacked, reloading;
-    int bulletsShot;
+    private SpiderStats stats;
+    
     void Start()
     {
         player = GameObject.Find("RoboSamurai").transform;
         sight = GetComponent<SpiderSight>();
+        stats = GetComponent<SpiderStats>();
     }
 
     void Update()
     {
-        // if(!reloading && bulletsShot == magazineSize)
-        //     StartCoroutine(Reload());
-        
-        if(sight.playerInAttackRange) AttackPlayer();
+        if(!stats.gettingKnockbacked)
+        {
+            if(sight.playerInAttackRange && sight.playerNotBehindCover) AttackPlayer();
+        }
     }
 
     private void AttackPlayer()
     {
-        Vector3 playerPos = player.position + new Vector3(0f, 0.7f, 0f);
-        gun.LookAt(playerPos);
-        gun2.LookAt(playerPos);
-        gunPoint.LookAt(playerPos);
-        gunPoint2.LookAt(playerPos);
+        transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
+        
+        rifle.LookAt(PredictPosition(player));
+        rifle2.LookAt(PredictPosition(player));
+        gunPoint.LookAt(PredictPosition(player));
+        gunPoint2.LookAt(PredictPosition(player));
+
+        if(enemyType == EnemyType.BurstBlaster) {
+            if(canShoot) {
+                StartCoroutine(FireBurst(blasterProjectile, burstShots));
+            }
+        } else if(enemyType == EnemyType.HeavyMissile) {
+            if(canShoot) {
+                StartCoroutine(FireBurst(missileProjectile, burstShots));
+            }
+        }
     }
+    private Vector3 PredictPosition(Transform target){
+        Vector3 pos = target.position;
+        Vector3 dir = target.GetComponent<PlayerPhysics>().controllerVelocity;
+        
+        float dist = (pos-transform.position).magnitude;
 
-    public void Shoot()
+        return pos + (dist/blasterProjectile.GetComponent<BulletBase>().bulletSpeed)*dir;
+    }
+    public IEnumerator FireBurst(GameObject bulletPrefab, int burstSize)
     {
+        canShoot = false;
+        // rate of fire in weapons is in rounds per minute (RPM), therefore we should calculate how much time passes before firing a new round in the same burst.
+        for (int i = 0; i < burstSize + 1; i++)
+        {
+            Instantiate(shootingParticles, gunPoint.position, gunPoint.rotation);
+            Instantiate(shootingParticles, gunPoint2.position, gunPoint2.rotation);
 
+            BulletBase bullet1 = Instantiate(bulletPrefab, gunPoint.position, gunPoint.rotation).GetComponent<BulletBase>();
+            BulletBase bullet2 = Instantiate(bulletPrefab, gunPoint2.position, gunPoint2.rotation).GetComponent<BulletBase>();
+                
+            bullet1.bulletDamage = damage;
+            bullet2.bulletDamage = damage;
+            yield return new WaitForSeconds(timeBetweenBursts);
+        }
+        
+        yield return new WaitForSeconds(timeBetweenAttacks); // wait till the next round
+        
+        canShoot = true;
     }
 }

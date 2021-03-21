@@ -1,0 +1,129 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7805960762017204152
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7805960762017204159}
+  - component: {fileID: 7805960762017204158}
+  m_Layer: 0
+  m_Name: Halabard
+  m_TagString: Melee
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7805960762017204159
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7805960762017204152}
+  m_LocalRotation: {x: 0.3216136, y: -0.01214015, z: -0.23501113, w: 0.9171625}
+  m_LocalPosition: {x: 0.09, y: 0.074, z: 0.12}
+  m_LocalScale: {x: 0.3224093, y: 0.3224093, z: 0.3224091}
+  m_Children:
+  - {fileID: 7772912281590446130}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 35.749, y: -12.339, z: -32.737}
+--- !u!114 &7805960762017204158
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7805960762017204152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 326e114cecda43544ab03a54e5d5f37a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponDefinition: {fileID: 11400000, guid: 434b1261b5dab0ef8ba1c1dad23c87f5, type: 2}
+  canAttack: 1
+  trail: {fileID: 0}
+  sword1: {fileID: 0}
+  sword2: {fileID: 0}
+--- !u!1001 &7805960763528798169
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 7805960762017204159}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 0662bc85b8c5c4fc4be0c3287310de96, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 0662bc85b8c5c4fc4be0c3287310de96, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.9235
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 0662bc85b8c5c4fc4be0c3287310de96, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.9235
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 0662bc85b8c5c4fc4be0c3287310de96, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.9235
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 0662bc85b8c5c4fc4be0c3287310de96, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 0662bc85b8c5c4fc4be0c3287310de96, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 0662bc85b8c5c4fc4be0c3287310de96, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 0662bc85b8c5c4fc4be0c3287310de96, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.9814275
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 0662bc85b8c5c4fc4be0c3287310de96, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.18942186
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 0662bc85b8c5c4fc4be0c3287310de96, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.019786244
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 0662bc85b8c5c4fc4be0c3287310de96, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.022976656
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 0662bc85b8c5c4fc4be0c3287310de96, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 21.883
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 0662bc85b8c5c4fc4be0c3287310de96, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -1.861
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 0662bc85b8c5c4fc4be0c3287310de96, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 2.322
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 0662bc85b8c5c4fc4be0c3287310de96, type: 3}
+      propertyPath: m_Name
+      value: halabar
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 0662bc85b8c5c4fc4be0c3287310de96, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 0662bc85b8c5c4fc4be0c3287310de96, type: 3}
+--- !u!4 &7772912281590446130 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0662bc85b8c5c4fc4be0c3287310de96, type: 3}
+  m_PrefabInstance: {fileID: 7805960763528798169}
+  m_PrefabAsset: {fileID: 0}

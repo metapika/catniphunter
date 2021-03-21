@@ -9,41 +9,43 @@ public class SpiderMovement : MonoBehaviour
     public NavMeshAgent agent;
     private Transform player;
     private SpiderSight sight;
+    private SpiderStats stats;
     private Vector3 startingPosition;
 
     void Awake () {
         player = GameObject.Find("RoboSamurai").transform;
         sight = GetComponent<SpiderSight>();
+        stats = GetComponent<SpiderStats>();
 
         startingPosition = transform.position;
     }
 
     void Update()
     {
-        // if(sight.playerInSightRange) {
-        //     LookAtPlayer();
-        // }
-        
-        if(sight.playerInSightRange) {
+        if(sight.playerInSightRange && sight.justSawPlayer) {
             transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
         }
 
-
-        if(sight.playerInSightRange && !sight.playerInAttackRange)
-        {
-            ChasePlayer();
-
-        } else {
-            agent.SetDestination(transform.position);
+        if(!stats.gettingKnockbacked) {
+            if(sight.justSawPlayer || sight.justSawPlayer && !sight.playerNotBehindCover)
+            {
+                ChasePlayer();
+            } else {
+                agent.SetDestination(transform.position);
+            }
         }
     }
 
     private void ChasePlayer()
     {
         Vector3 movePos = player.position;
-        movePos = Vector3.MoveTowards(movePos, transform.position, sight.attackRange);
+        if(sight.playerNotBehindCover) {
+            movePos = Vector3.MoveTowards(movePos, transform.position, sight.attackRange);
+            agent.SetDestination(movePos);
+        } else {
+            agent.SetDestination(player.position);
+        }
         
-        agent.SetDestination(movePos);
     }
 
     private void LookAtPlayer()

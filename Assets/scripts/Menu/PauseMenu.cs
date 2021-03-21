@@ -55,10 +55,10 @@ public class PauseMenu : MonoBehaviour
             Player.GetComponent<PlayerController>().enabled = true;
         if(Player.GetComponent<PlayerCombat>() != null)
             Player.GetComponent<PlayerCombat>().enabled = true;
-        if(Player.transform.Find("CurrentAbilities").gameObject != null)
-            Player.transform.Find("CurrentAbilities").gameObject.SetActive(true);
+        if(Player.GetComponent<PlayerCombat>().currentAbilities != null)
+            Player.GetComponent<PlayerCombat>().currentAbilities.gameObject.SetActive(true);
     }
-    private void DisableComponents() {
+    public void DisableComponents() {
         PageController.TurnPageOn(PageType.PauseMenu);
         Time.timeScale = 0f;
         if(Camera.main != null)
@@ -67,7 +67,7 @@ public class PauseMenu : MonoBehaviour
             Player.GetComponent<PlayerController>().enabled = false;
         if(Player.GetComponent<PlayerCombat>() != null)
             Player.GetComponent<PlayerCombat>().enabled = false;
-        if(Player.transform.Find("CurrentAbilities").gameObject != null)
-            Player.transform.Find("CurrentAbilities").gameObject.SetActive(false);
+        if(Player.GetComponent<PlayerCombat>().currentAbilities != null)
+            Player.GetComponent<PlayerCombat>().currentAbilities.gameObject.SetActive(false);
     }
 }

@@ -7,11 +7,10 @@ public class PreviousPage : MonoBehaviour
 {
     public List<PageType> pageHistory;
     public PageController PageController;
-    private GameObject menuBackground;
+    public GameObject menuBackground;
 
     void Start()
     {
-        menuBackground = GameObject.Find("Menu Only");
         menuBackground.SetActive(true);
         PageController = PageController.instance;
         pageHistory = new List<PageType>();

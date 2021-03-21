@@ -539,23 +539,23 @@ ModelImporter:
         length: 0
         modified: 0
     skeleton:
-    - name: xbot@Idle (1)(Clone)
+    - name: roboSamuraiModel(Clone)
       parentName: 
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: Beta_Joints
-      parentName: xbot@Idle (1)(Clone)
+      parentName: roboSamuraiModel(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: Beta_Surface
-      parentName: xbot@Idle (1)(Clone)
+      parentName: roboSamuraiModel(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: mixamorig:Hips
-      parentName: xbot@Idle (1)(Clone)
+      parentName: roboSamuraiModel(Clone)
       position: {x: -0.004121775, y: 1.0720447, z: 0.020950764}
       rotation: {x: -0, y: -0, z: -0.000000013460522, w: 1}
       scale: {x: 1, y: 1, z: 1}
@@ -823,7 +823,7 @@ ModelImporter:
       parentName: mixamorig:RightHand
       position: {x: 0.024648061, y: -0.015727142, z: 0.026826264}
       rotation: {x: -0.11863704, y: -0.086847514, z: 0.1186371, w: 0.9819919}
-      scale: {x: 1, y: 1, z: 1.0000001}
+      scale: {x: 1, y: 1, z: 1.0000002}
     - name: mixamorig:RightHandThumb2
       parentName: mixamorig:RightHandThumb1
       position: {x: 0.03229772, y: -0.018647088, z: 0.018647185}
@@ -833,7 +833,7 @@ ModelImporter:
       parentName: mixamorig:RightHandThumb2
       position: {x: 0.02652605, y: -0.015314492, z: 0.015314456}
       rotation: {x: -0.000000011641534, y: 0.000000002910383, z: 0.000000016734703, w: 1}
-      scale: {x: 1.0000001, y: 1.0000001, z: 1.0000001}
+      scale: {x: 1.0000001, y: 1.0000001, z: 1.0000002}
     - name: mixamorig:RightHandThumb4
       parentName: mixamorig:RightHandThumb3
       position: {x: 0.019545805, y: -0.011284617, z: 0.01128507}

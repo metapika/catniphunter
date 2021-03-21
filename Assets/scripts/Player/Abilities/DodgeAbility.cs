@@ -19,10 +19,12 @@ public class DodgeAbility : MonoBehaviour
     private GameObject PostProcess;
     private PlayerPhysics pphysics;
     private PlayerController movement;
+    private PlayerStats stats;
     
     void Start() {
         movement = transform.root.gameObject.GetComponent<PlayerController>();
         pphysics = transform.root.gameObject.GetComponent<PlayerPhysics>();
+        stats = transform.root.gameObject.GetComponent<PlayerStats>();
 
         Camera m_MainCamera = Camera.main;
 
@@ -35,7 +37,7 @@ public class DodgeAbility : MonoBehaviour
     }
 
     void Update() {
-        if(Input.GetKeyDown(KeyCode.LeftShift) && pphysics.IsGrounded() && movement.sprinting) {
+        if(Input.GetKeyDown(KeyCode.LeftShift) && pphysics.IsGrounded() && stats.currentSpeed == stats.sprintSpeed) {
             if(currentDodgeCount < dodgeCount) {
                 StartCoroutine(Dodge());
             }
@@ -80,6 +82,7 @@ public class DodgeAbility : MonoBehaviour
         while(Time.time < startTime + dodgeTime)
         {
             movement.controller.Move(movement.moveDir * dodgeSpeed * Time.deltaTime);
+            
             yield return null;
         }
         

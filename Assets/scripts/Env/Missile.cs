@@ -29,7 +29,7 @@ public class Missile : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         col = GetComponent<CapsuleCollider>();
         target = GameObject.Find("RoboSamurai").transform;
-        cam = GameObject.Find("Main Camera").GetComponent<Camera>();
+        cam = Camera.main;
         StartCoroutine(WaitBeforeHoming());
 
         randomRotation = Random.Range(rotationForce / 2, rotationForce);

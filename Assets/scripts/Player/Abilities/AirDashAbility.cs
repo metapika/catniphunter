@@ -18,6 +18,7 @@ public class AirDashAbility : MonoBehaviour, IHasCooldown
     private Animator playerAnim;
     private PlayerPhysics pphysics;
     private PlayerController movement;
+    private PlayerStats stats;
 
     [Space]
 
@@ -25,18 +26,17 @@ public class AirDashAbility : MonoBehaviour, IHasCooldown
     public float mass = 3f;
     Vector3 impact = Vector3.zero;
     [SerializeField] private float airDashSpeed = 15f;
-    //[SerializeField] private float airDashTime = 0.35f;
 
     private void Awake() {
         playerAnim = transform.root.gameObject.GetComponent<Animator>();
         movement = transform.root.gameObject.GetComponent<PlayerController>();
         pphysics = transform.root.gameObject.GetComponent<PlayerPhysics>();
-
+        stats = transform.root.gameObject.GetComponent<PlayerStats>();
         cooldownSystem = transform.parent.GetComponent<CooldownManager>();
     }
 
     private void Update() {
-        if(Input.GetKeyDown(KeyCode.LeftShift) && !pphysics.IsGrounded() && movement.sprinting) {
+        if(Input.GetKeyDown(KeyCode.LeftShift) && !pphysics.IsGrounded()) {
             if(!cooldownSystem.IsOnCooldown(abilityId)) {
                 cooldownSystem.PutOnCooldown(this);
                 playerAnim.SetBool("dashing", true);

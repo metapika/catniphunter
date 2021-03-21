@@ -6,7 +6,7 @@ public class Pit : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other) {
         if(other.gameObject.CompareTag("Player")) {
-            other.transform.Find("Death").GetComponent<Die>().CommitDie("waterDeath");
+            other.GetComponent<PlayerStats>().Die("waterDeath");
         }
     }
 }

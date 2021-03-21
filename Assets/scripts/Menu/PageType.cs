@@ -13,7 +13,8 @@ namespace UnityCore {
             Options,
             IngameUI,
             Customize,
-            DeathScreen
+            DeathScreen,
+            MoneyNumber
         }
     }
 }

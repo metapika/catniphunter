@@ -17,7 +17,7 @@ public class BouncePad : MonoBehaviour
         if (other.gameObject.CompareTag("Player")) {
             
             PlayerPhysics pphysics = other.gameObject.GetComponent<PlayerPhysics>();
-            pphysics.velocity = direction * Mathf.Sqrt(bounceForce * -2f * pphysics.gravity);
+            pphysics.velocity = direction * Mathf.Sqrt(bounceForce * -2f * pphysics.currentGravity);
         }
     }
 }

@@ -1,64 +1,91 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using System.Linq;
 using DG.Tweening;
 
-public class PlayerCombat : MonoBehaviour {
-    [Header("Sword")]
-    [SerializeField] private GameObject cutter;
-    [SerializeField] private Transform swordCase;
-    [SerializeField] private Transform swordHand;
-    [SerializeField] private ParticleSystem swordParticles;
-    public PlayerStats stats;
-    private bool combo;
+public class PlayerCombat : MonoBehaviour
+{
+    #region Fields
+    public Transform currentAbilities;
+    public GameObject currentWeapon;
+    public Transform weaponCase;
+    public Transform weaponHand;
+    public Transform weaponHand2;
+    public Transform cameraTarget;
+    public Transform knifeThrowPoint;
+    public GameObject crossair;
+    public float offsetToDashedEnemy = 1.2f;
+    public float minOffsetToDash = 0.2f;
+    public Vector3 offset = new Vector3(0, .8f, 0);
 
-    [Header("Targets in radius")]
     public List<Transform> targets;
     public int targetIndex;
-    bool targetNotBehindCover = false;
+    public LayerMask maskForCoverCheck;
+    private bool targetNotBehindCover;
 
-    [Header("Charged attack")]
-    public float chargeTimer = 0f;
-    public float chargeDestination = 2f;
-    public Slider chargeSlider;
-    public Image sliderFill;
-    
     private CharacterController controller;
     private PlayerPhysics pphysics;
-    public PlayerController player;
-    public GameObject cam;
+    private PlayerController movement;
+    private PlayerStats stats;
     private Animator anim;
-    private ShieldAbility shield;
+    private AbilityManager abilityList;
     private static readonly int hashSpeedPercentage = Animator.StringToHash("SpeedPercentage");
 
-    private bool electrified;
-    public float electrifiedTime = 2f;
-    
-    private void Start() {
+    #endregion
+
+    #region Unity Functions
+    private void Awake() {
         controller = GetComponent<CharacterController>();
-        anim = GetComponent<Animator>();
-        player = GetComponent<PlayerController>();
+        movement = GetComponent<PlayerController>();
         pphysics = GetComponent<PlayerPhysics>();
+        stats = GetComponent<PlayerStats>();
+        anim = GetComponent<Animator>();
+        abilityList = currentAbilities.GetComponent<AbilityManager>();
 
-        if(transform.Find("CurrentAbilities").transform.Find("ShieldAbility") != null) {
-            shield = transform.Find("CurrentAbilities").transform.Find("ShieldAbility").GetComponent<ShieldAbility>();
+        currentWeapon = GetObtainedWeapons();
+
+        if(currentWeapon != null) {
+            if(currentWeapon.GetComponent<Melee>().weaponDefinition.weaponType == Weapon_SO.WeaponType.DoubleSwords) {
+                currentWeapon.GetComponent<Melee>().sword1.GetComponent<BoxCollider>().enabled = false;
+                currentWeapon.GetComponent<Melee>().sword2.GetComponent<BoxCollider>().enabled = false;
+            } else {
+                currentWeapon.GetComponent<BoxCollider>().enabled = false;
+            }
         }
-        
-        cutter.GetComponent<BoxCollider>().enabled = false;
-        swordParticles.Stop();
     }
+    private void Update() {
+        DetectTargets();
+    }
+    private void OnTriggerEnter(Collider other) {
+        if(other.CompareTag("WeaponPad")) {
+            WeaponPad pad = other.GetComponent<WeaponPad>();
 
-    void Update()
-    {
-        //Targets
+            if(pad.activeWeapon != null) {
+                if(pad.activeWeapon.CompareTag("Weapon") || pad.activeWeapon.CompareTag("Melee") ) {
+                    EquipWeapon(pad.activeWeapon);
+                    pad.anim.enabled = false;
+                    pad.activeWeapon = null;
+                } else if(pad.activeWeapon.CompareTag("Ability")) {
+                    EquipMod(pad.activeWeapon.GetComponent<AbilityID>().ID);
+                    Destroy(pad.activeWeapon);
+                    pad.activeWeapon = null;
+                }
+            }
+        }
+    }
+    #endregion
+
+    #region Custom Functions
+    private void DetectTargets() {
         if (targets.Count > 0)
         {
+            movement.canRotate = false;
             targetIndex = NearestTargetToCenter();
-            
+
             RaycastHit hit;
             Vector3 direction = targets[targetIndex].position - transform.position;     
-            Physics.Raycast(transform.position, direction, out hit, Vector3.Distance(transform.position, targets[targetIndex].position));
+            Physics.Raycast(transform.position, direction, out hit, Vector3.Distance(transform.position, targets[targetIndex].position), maskForCoverCheck);
 
             if(hit.transform != null)
             {
@@ -68,61 +95,37 @@ public class PlayerCombat : MonoBehaviour {
                     targetNotBehindCover = false;
             }
             
-            if(pphysics.IsGrounded())
-                if(transform.position.y - targets[targetIndex].position.y < 3 && transform.position.y - targets[targetIndex].position.y > -3)
-                        if(targetNotBehindCover)
-                            transform.LookAt(new Vector3(targets[targetIndex].position.x, transform.position.y, targets[targetIndex].position.z));
+            if(pphysics.IsGrounded() && targetNotBehindCover) {
+                if(transform.position.y - targets[targetIndex].position.y < 3 && transform.position.y - targets[targetIndex].position.y > -3) 
+                {
+                    transform.LookAt(new Vector3(targets[targetIndex].position.x, transform.position.y, targets[targetIndex].position.z));
+                }
+            }
+        } else {
+            movement.canRotate = true;
         }
-        
-        //Combo & charged attack
-        if(Input.GetButton("Fire1")) {
-            EquipSword();
+    }
+    public void MoveTowardsTarget(Transform target = null)
+    {
+        if(target == null) 
+        {
+            target = targets[targetIndex];
+        }
 
-            if(pphysics.IsGrounded()) {
-                if(shield != null && !shield.blocking) {
-                    Combo();
-                } else {
-                    Combo();
+        if (Vector3.Distance(transform.position, target.position) > minOffsetToDash && Vector3.Distance(transform.position, target.position) < 10)
+        {
+            if(currentWeapon.GetComponent<Melee>().weaponDefinition.weaponType != Weapon_SO.WeaponType.Knife) {
+                transform.DOMove(TargetOffset(), .3f);
+                if(pphysics.IsGrounded()) 
+                {
+                    if(transform.position.y - targets[targetIndex].position.y < 3 && transform.position.y - targets[targetIndex].position.y > -3)
+                    {
+                        transform.DOLookAt(new Vector3(targets[targetIndex].position.x, transform.position.y, targets[targetIndex].position.z), .2f);
+                    }
                 }
             }
         }
-        
-        if(Input.GetKeyDown(KeyCode.I)) {
-            EquipSword();
-        } else if (Input.GetKeyDown(KeyCode.O)) {
-            UnequipSword();
-        }
     }
-
-    private void Combo() 
-    {
-        int attacknum = Random.Range(0, 2);
-        List<string> animList = new List<string>(new string[] {"slash1", "slash2"});
-        
-        if(!combo) {
-            anim.SetTrigger(animList[attacknum]);
-        }
-    }
-    
-    public void MoveTowardsTarget(Transform target)
-    {
-        if (Vector3.Distance(transform.position, target.position) > 1 && Vector3.Distance(transform.position, target.position) < 10)
-        {
-            anim.SetFloat(hashSpeedPercentage, 1f, 0.1f, Time.deltaTime);
-            transform.DOMove(TargetOffset(), .5f);
-            if(pphysics.IsGrounded())
-            if(transform.position.y - targets[targetIndex].position.y < 3 && transform.position.y - targets[targetIndex].position.y > -3)
-                transform.DOLookAt(new Vector3(targets[targetIndex].position.x, transform.position.y, targets[targetIndex].position.z), .2f);
-        }
-    }
-    
-    public Vector3 TargetOffset()
-    {
-        Vector3 position;
-        position = targets[targetIndex].position;
-        return Vector3.MoveTowards(position, transform.position, 1.2f);
-    }
-    
     private int NearestTargetToCenter()
     {
         float[] distances = new float[targets.Count];
@@ -142,66 +145,102 @@ public class PlayerCombat : MonoBehaviour {
         }
         return index;
     }
-    
-    public void SelectTarget(int index)
+
+    public Vector3 TargetOffset()
     {
-        targetIndex = index;
-        if(pphysics.IsGrounded())
-            if(transform.position.y - targets[targetIndex].position.y < 3 && transform.position.y - targets[targetIndex].position.y > -3)
-                transform.DOLookAt(new Vector3(targets[targetIndex].position.x, transform.position.y, targets[targetIndex].position.z), .3f).SetUpdate(true);
-    } 
-    
-    private void OnTriggerEnter(Collider other)
-    {
-        if(other.gameObject.CompareTag("Electric")) {
-            if(!electrified) {
-                stats.TakeDamage(1);
-                StartCoroutine(Electrified());
-            }
+        Vector3 position;
+        position = targets[targetIndex].position + offset;
+        return Vector3.MoveTowards(position, transform.position, offsetToDashedEnemy);
+    }
+    private void EquipWeapon(GameObject weapon) {
+        currentWeapon = weapon;
+        
+        currentWeapon.transform.SetParent(weaponCase);
+        currentWeapon.transform.position = weaponCase.position;
+        currentWeapon.transform.rotation = weaponCase.rotation;
+
+        if(weapon.GetComponent<Melee>() != null) {
+            weapon.GetComponent<Melee>().InitializeEquip();
         }
     }
+    private GameObject GetObtainedWeapons() {
+        GameObject selectedWeapon = null;
 
-    private IEnumerator Electrified() {
-        electrified = true;
-        anim.SetBool("electrified", true);
-        player.canMove = false;
+        foreach (Transform possibleWeapon in weaponCase) {
+            if(possibleWeapon.CompareTag("Weapon") || possibleWeapon.CompareTag("Melee")) {
+                selectedWeapon = possibleWeapon.gameObject;
+                return selectedWeapon;
+            }
+        }
 
-        yield return new WaitForSeconds(electrifiedTime);
+        if(selectedWeapon == null) {
+            foreach (Transform possibleWeapon in weaponHand) {
+                if(possibleWeapon.CompareTag("Weapon") || possibleWeapon.CompareTag("Melee")) {
+                    if(selectedWeapon == null) {
+                        selectedWeapon = possibleWeapon.gameObject;
+                        return selectedWeapon;
+                    }
+                }
+            } 
+        }
 
-        electrified = false;
-        anim.SetBool("electrified", false);
-        player.canMove = true;
+        return selectedWeapon;
     }
+    private void EquipMod(int ID) {
+        var mod = abilityList.allMods[ID];
+        var abilityID = mod.GetComponent<AbilityID>();
+        var newID = abilityID.ID;
+        
+        if (!abilityList.collectedMods.Any(a => a.GetComponent<AbilityID>().ID == newID)) {
+            Instantiate(abilityList.allMods[ID], currentAbilities.position, Quaternion.identity, currentAbilities);
+        }
 
+        abilityList.ReloadMods();
+    }
     public void EnableCutter()
     {
-        cutter.GetComponent<BoxCollider>().enabled = true;
+        if(currentWeapon.GetComponent<Melee>().weaponDefinition.weaponType == Weapon_SO.WeaponType.DoubleSwords) {
+            currentWeapon.GetComponent<Melee>().sword1.GetComponent<BoxCollider>().enabled = true;
+            currentWeapon.GetComponent<Melee>().sword2.GetComponent<BoxCollider>().enabled = true;
+        } else {
+            currentWeapon.GetComponent<BoxCollider>().enabled = true;
+        }
+        
     }
-    
     public void DisableCutter()
     {
-        cutter.GetComponent<BoxCollider>().enabled = false;
+        if(currentWeapon.GetComponent<Melee>().weaponDefinition.weaponType == Weapon_SO.WeaponType.DoubleSwords) {
+            currentWeapon.GetComponent<Melee>().sword1.GetComponent<BoxCollider>().enabled = false;
+            currentWeapon.GetComponent<Melee>().sword2.GetComponent<BoxCollider>().enabled = false;
+        } else {
+            currentWeapon.GetComponent<BoxCollider>().enabled = false;
+        }
     }
-
-    public void UnequipSword() {
-        cutter.transform.SetParent(swordCase);
-        cutter.transform.position = swordCase.position;
-        cutter.transform.rotation = swordCase.rotation;
-    }
-    
-    public void EquipSword() {
-        cutter.transform.SetParent(swordHand);
-        cutter.transform.position = swordHand.position;
-        cutter.transform.rotation = swordHand.rotation;
-    }
-
     public void StartCombo() {
-        swordParticles.Play();
-        combo = true;
+        if(currentWeapon.GetComponent<Melee>().weaponDefinition.weaponType == Weapon_SO.WeaponType.Katana) {
+            currentWeapon.GetComponent<Melee>().trail.Play();
+        }
+        if(targets.Count > 0)
+        {
+            MoveTowardsTarget();
+        }
+
+        currentWeapon.GetComponent<Melee>().canAttack = false;
+        movement.canMove = false;
+        anim.SetBool("inCombat", true);
+    }
+    public void StopCombo() {
+        if(currentWeapon.GetComponent<Melee>().weaponDefinition.weaponType == Weapon_SO.WeaponType.Katana) {
+            currentWeapon.GetComponent<Melee>().trail.Stop();
+        }
+        currentWeapon.GetComponent<Melee>().canAttack = true;
+        movement.canMove = true;
+    }
+    public void NoLongerInCombat() {
+        anim.SetBool("inCombat", false);
+
+        currentWeapon.GetComponent<Melee>().UnequipSword();
     }
 
-    public void StopCombo() {
-        swordParticles.Stop();
-        combo = false;
-    }
+    #endregion
 }
