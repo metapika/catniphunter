@@ -45,23 +45,11 @@ public class Melee : MonoBehaviour
 
     private void OnTriggerEnter(Collider other) {
         if(other.CompareTag("Enemy")) {
-            other.GetComponent<SpiderStats>().TakeDamage(weaponDefinition.damage);
-            Instantiate(hitParticles, other.ClosestPoint(transform.position), transform.rotation);
-            
-            if(!other.GetComponent<SpiderStats>().gettingKnockbacked) {
+            if(!other.GetComponent<SpiderStats>().gettingKnockbacked && !other.GetComponent<SpiderStats>().dead) {
+                other.GetComponent<SpiderStats>().TakeDamage(weaponDefinition.damage, transform.root);
+                Instantiate(hitParticles, other.ClosestPoint(transform.position), transform.rotation);
                 StartCoroutine(other.GetComponent<SpiderStats>().Knockback(transform, attacksKnockBackStrenght[attacknum -1]));
-                
-                Rigidbody rb = other.GetComponent<Rigidbody>();
-
-                if(rb != null)
-                {
-                    Vector3 direction = other.transform.position - transform.root.position;
-                    direction.y = 0;
-
-                    rb.AddForce(direction.normalized * attacksKnockBackStrenght[attacknum -1], ForceMode.Impulse);
-                }
             }
-
         }
         if(other.CompareTag("VentOpening")) {
             Destroy(other.gameObject);

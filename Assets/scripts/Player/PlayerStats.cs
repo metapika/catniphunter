@@ -18,12 +18,15 @@ public class PlayerStats : MonoBehaviour
     public int speedScale = 1;
     public float jumpForce = 3;
     public float doubleJumpForce = 2;
+    private bool canTakeDamage = true;
     [Space]
 
     [Header("Spectacular Death")]
     public Slider healthBar;
     public TextMeshProUGUI healthText;
     public GameObject hitTextPopUp;
+    public Image hitIndicatorPixels;
+    public Image hitIndicatorColor;
     public GameObject GameUI;
     public LayerMask whatIsPlayer;
     public Material deathMaterial;
@@ -37,14 +40,14 @@ public class PlayerStats : MonoBehaviour
 
     #region Unity Functions
     private void Awake() {
-        //Health and speed values
         currentHealth = maxHealth;
+
+        currentSpeed = sprintSpeed * speedScale;
+        
         if(healthBar != null) {
             healthBar.maxValue = maxHealth;
         }
-        currentSpeed = sprintSpeed * speedScale;
 
-        //Death
         SceneController = SceneController.instance;
         PageController = PageController.instance;
 
@@ -81,6 +84,8 @@ public class PlayerStats : MonoBehaviour
     #region Stat Reducers
     public void TakeDamage(int amount)
     {
+        if(!canTakeDamage) return;
+
         if ((currentHealth - amount) < 0)
         {
             currentHealth = 0;
@@ -89,6 +94,7 @@ public class PlayerStats : MonoBehaviour
         }
 
         ShowFloatingText(amount.ToString());
+        HitUI(amount);
         UpdateUI();
     }
 
@@ -123,16 +129,45 @@ public class PlayerStats : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         PageController.TurnPageOn(PageType.DeathScreen);
     }
-
     private void ShowFloatingText(string amount) {
         var hitText = Instantiate(hitTextPopUp, transform.position, Quaternion.identity);
         hitText.GetComponent<TextMesh>().text = amount;
     }
+    private void HitUI(int amount) {
 
+        if(amount < maxHealth / 3) {
+            hitIndicatorColor.color = new Color(hitIndicatorColor.color.r, hitIndicatorColor.color.b, hitIndicatorColor.color.g, 10);
+            hitIndicatorPixels.color = new Color(hitIndicatorColor.color.r, hitIndicatorColor.color.b, hitIndicatorColor.color.g, 10);
+            StartCoroutine(WearOffColor(10));
+        } else {
+            hitIndicatorColor.color = new Color(hitIndicatorColor.color.r, hitIndicatorColor.color.b, hitIndicatorColor.color.g, 30);
+            hitIndicatorPixels.color = new Color(hitIndicatorColor.color.r, hitIndicatorColor.color.b, hitIndicatorColor.color.g, 10);
+            StartCoroutine(WearOffColor(30));
+        }
+
+    }
+
+    private IEnumerator WearOffColor(int startAmount)
+    {
+        float timer = 0;
+        while(true) {
+            timer += Time.deltaTime;
+
+            if(timer > 4) {
+                hitIndicatorColor.color = new Color(hitIndicatorColor.color.r, hitIndicatorColor.color.b, hitIndicatorColor.color.g, 0);
+                hitIndicatorPixels.color = new Color(hitIndicatorColor.color.r, hitIndicatorColor.color.b, hitIndicatorColor.color.g, 0);
+                break;
+            }
+
+            yield return null;
+        }
+    }
     public void ChangeSpeed(float target) {
         currentSpeed = target * speedScale;
     }
-
+    public void ChangeHealthState(bool state) {
+        canTakeDamage = state;
+    }
     private void UpdateUI() {
         if(healthBar != null) {
             healthBar.value = currentHealth;

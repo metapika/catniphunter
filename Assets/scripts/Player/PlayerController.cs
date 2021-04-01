@@ -8,12 +8,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask whatIsEnv;
     [SerializeField] private float slopeForce = 13f;
     [SerializeField] private float slopeForceRayLength = 1.2f;
-    private bool isJumping;
     private float originalHeight;
     [SerializeField] private Vector3 originalCenter;
 
     [HideInInspector] public Vector3 moveDir;
     [HideInInspector] public CharacterController controller;
+    public bool canRotate = true;
+    public bool canMove = true;
+    private bool crouching = false;
     private float speedSmoothTime = 0.1f;
     private bool jumpWasPressed;
     private bool canJumpNoGrounded;
@@ -42,11 +44,8 @@ public class PlayerController : MonoBehaviour
     }
 
     void Update() {
-        if(canMove) {
-            Movement();
-            Jumping();
-        }
-        
+        Movement();
+        Jumping();
         HandleAnimations();
 
         if(Input.GetKeyDown(KeyCode.L)) {
@@ -62,10 +61,9 @@ public class PlayerController : MonoBehaviour
     #endregion
 
     #region Custom Functions
-    public bool canRotate = true;
-    public bool canMove = true;
-    bool crouching = false;
     private void Movement() {
+        if(!canMove) return;
+
         Vector2 movementInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
         
         Vector3 forward = Camera.main.transform.forward;
@@ -125,18 +123,22 @@ public class PlayerController : MonoBehaviour
     }
     private bool OnSlope()
     {
-        if (isJumping)
-            return false;
-
         RaycastHit hit;
 
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, controller.height / 2 * slopeForceRayLength))
-            if (hit.normal != Vector3.up)
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, controller.height / 2 * slopeForceRayLength)) {
+            if (hit.normal != Vector3.up) {
                 return true;
-        return false;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     private void Jumping() {
+        if(!canMove) return;
+        
         if(Input.GetKeyDown(KeyCode.Space)) 
         {
             jumpWasPressed = true;

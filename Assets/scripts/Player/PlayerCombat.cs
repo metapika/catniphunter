@@ -19,8 +19,10 @@ public class PlayerCombat : MonoBehaviour
     public float minOffsetToDash = 0.2f;
     public Vector3 offset = new Vector3(0, .8f, 0);
 
+    public bool canDetectEnemies = true;
     public List<Transform> targets;
     public int targetIndex;
+    public int lockOnTargetIndex;
     public LayerMask maskForCoverCheck;
     private bool targetNotBehindCover;
 
@@ -30,6 +32,7 @@ public class PlayerCombat : MonoBehaviour
     private PlayerStats stats;
     private Animator anim;
     private AbilityManager abilityList;
+    private CameraController camControl;
     private static readonly int hashSpeedPercentage = Animator.StringToHash("SpeedPercentage");
 
     #endregion
@@ -41,6 +44,7 @@ public class PlayerCombat : MonoBehaviour
         pphysics = GetComponent<PlayerPhysics>();
         stats = GetComponent<PlayerStats>();
         anim = GetComponent<Animator>();
+        camControl = Camera.main.GetComponent<CameraController>();
         abilityList = currentAbilities.GetComponent<AbilityManager>();
 
         currentWeapon = GetObtainedWeapons();
@@ -55,7 +59,22 @@ public class PlayerCombat : MonoBehaviour
         }
     }
     private void Update() {
-        DetectTargets();
+        TargetDetection();
+
+        if(Input.GetKeyDown(KeyCode.R) && targetNotBehindCover && targets.Count > 0)
+        {
+            camControl.ToggleCameraLockOn();
+        }
+        if(camControl.CameraToggleState()) {
+            if(Input.GetKeyDown(KeyCode.Q))
+            {
+                AddIndex(-1, targets.Count);
+            } 
+            else if(Input.GetKeyDown(KeyCode.E)) 
+            {
+                AddIndex(1, targets.Count);
+            }
+        }
     }
     private void OnTriggerEnter(Collider other) {
         if(other.CompareTag("WeaponPad")) {
@@ -77,57 +96,80 @@ public class PlayerCombat : MonoBehaviour
     #endregion
 
     #region Custom Functions
-    private void DetectTargets() {
+    public void AddIndex(int amount, int max) {
+        if ((lockOnTargetIndex += amount) >= max) {
+            lockOnTargetIndex -= max;
+            return;
+        }
+
+        if (lockOnTargetIndex >= 0) {
+            return;
+        }
+
+        lockOnTargetIndex = max + lockOnTargetIndex;
+    }
+    private void TargetDetection() {
+        if(!canDetectEnemies) return;
+
+        if(!camControl.CameraToggleState()) movement.canRotate = true;
+        else if(targetNotBehindCover && camControl.CameraToggleState()) movement.canRotate = false;
+        
         if (targets.Count > 0)
         {
-            movement.canRotate = false;
             targetIndex = NearestTargetToCenter();
+            
+            if(!camControl.CameraToggleState()) lockOnTargetIndex = NearestTargetToCenter();
 
             RaycastHit hit;
-            Vector3 direction = targets[targetIndex].position - transform.position;     
-            Physics.Raycast(transform.position, direction, out hit, Vector3.Distance(transform.position, targets[targetIndex].position), maskForCoverCheck);
+            Vector3 direction = Vector3.zero;
+                 
+            if(camControl.CameraToggleState()) {
+                direction = targets[lockOnTargetIndex].position - transform.position;
+                Physics.Raycast(transform.position, direction, out hit, Vector3.Distance(transform.position, targets[lockOnTargetIndex].position), maskForCoverCheck);
+            }
+            else{
+                direction = targets[targetIndex].position - transform.position;
+                Physics.Raycast(transform.position, direction, out hit, Vector3.Distance(transform.position, targets[targetIndex].position), maskForCoverCheck);
+            }
 
             if(hit.transform != null)
             {
-                if(hit.transform.gameObject.CompareTag("Enemy"))
-                    targetNotBehindCover = true;
-                else
-                    targetNotBehindCover = false;
+                if(hit.transform.gameObject.CompareTag("Enemy")) targetNotBehindCover = true;
+                else targetNotBehindCover = false;
             }
-            
-            if(pphysics.IsGrounded() && targetNotBehindCover) {
-                if(transform.position.y - targets[targetIndex].position.y < 3 && transform.position.y - targets[targetIndex].position.y > -3) 
-                {
-                    transform.LookAt(new Vector3(targets[targetIndex].position.x, transform.position.y, targets[targetIndex].position.z));
-                }
+
+            if(targetNotBehindCover && camControl.CameraToggleState()) {
+                int rotSpeed = 1;
+                Vector3 dir = targets[lockOnTargetIndex].position - transform.position;
+                dir.y = 0f;
+
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(dir), Time.time * rotSpeed);
             }
-        } else {
-            movement.canRotate = true;
+        } else if(camControl.CameraToggleState()) {
+            camControl.ToggleCameraLockOn();
         }
     }
-    public void MoveTowardsTarget(Transform target = null)
+    public void MoveTowardsTarget(int index, Transform target = null)
     {
         if(target == null) 
         {
-            target = targets[targetIndex];
+            target = targets[index];
         }
 
         if (Vector3.Distance(transform.position, target.position) > minOffsetToDash && Vector3.Distance(transform.position, target.position) < 10)
         {
             if(currentWeapon.GetComponent<Melee>().weaponDefinition.weaponType != Weapon_SO.WeaponType.Knife) {
-                transform.DOMove(TargetOffset(), .3f);
-                if(pphysics.IsGrounded()) 
-                {
-                    if(transform.position.y - targets[targetIndex].position.y < 3 && transform.position.y - targets[targetIndex].position.y > -3)
-                    {
-                        transform.DOLookAt(new Vector3(targets[targetIndex].position.x, transform.position.y, targets[targetIndex].position.z), .2f);
-                    }
-                }
+                if(camControl.CameraToggleState()) transform.DOMove(TargetOffset(lockOnTargetIndex), .3f);
+                else transform.DOMove(TargetOffset(targetIndex), .3f);
+
+                //if(transform.position.y - targets[index].position.y < 3 && transform.position.y - targets[index].position.y > -3)
+                transform.DOLookAt(new Vector3(targets[index].position.x, transform.position.y, targets[index].position.z), .2f);
             }
         }
     }
     private int NearestTargetToCenter()
     {
+        //Need to merge the for loops
         float[] distances = new float[targets.Count];
 
         for (int i = 0; i < targets.Count; i++)
@@ -140,16 +182,17 @@ public class PlayerCombat : MonoBehaviour
 
         for (int i = 0; i < distances.Length; i++)
         {
-            if (minDistance == distances[i])
+            if (minDistance == distances[i]) {
                 index = i;
+            }
         }
         return index;
     }
 
-    public Vector3 TargetOffset()
+    public Vector3 TargetOffset(int index)
     {
         Vector3 position;
-        position = targets[targetIndex].position + offset;
+        position = targets[index].position + offset;
         return Vector3.MoveTowards(position, transform.position, offsetToDashedEnemy);
     }
     private void EquipWeapon(GameObject weapon) {
@@ -222,7 +265,8 @@ public class PlayerCombat : MonoBehaviour
         }
         if(targets.Count > 0)
         {
-            MoveTowardsTarget();
+            if(camControl.CameraToggleState()) MoveTowardsTarget(lockOnTargetIndex);
+            else MoveTowardsTarget(targetIndex);
         }
 
         currentWeapon.GetComponent<Melee>().canAttack = false;

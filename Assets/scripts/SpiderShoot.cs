@@ -9,7 +9,6 @@ public class SpiderShoot : MonoBehaviour
         HeavyMissile
     }
     public EnemyType enemyType;
-    public Transform player;
     [Space]
     public GameObject blasterProjectile;
     public GameObject missileProjectile;
@@ -28,7 +27,6 @@ public class SpiderShoot : MonoBehaviour
     
     void Start()
     {
-        player = GameObject.Find("RoboSamurai").transform;
         sight = GetComponent<SpiderSight>();
         stats = GetComponent<SpiderStats>();
     }
@@ -37,18 +35,16 @@ public class SpiderShoot : MonoBehaviour
     {
         if(!stats.gettingKnockbacked)
         {
-            if(sight.playerInAttackRange && sight.playerNotBehindCover) AttackPlayer();
+            if(sight.playerInAttackRange) AttackPlayer();
         }
     }
 
     private void AttackPlayer()
     {
-        transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
-        
-        rifle.LookAt(PredictPosition(player));
-        rifle2.LookAt(PredictPosition(player));
-        gunPoint.LookAt(PredictPosition(player));
-        gunPoint2.LookAt(PredictPosition(player));
+        rifle.LookAt(PredictPosition(sight.player));
+        rifle2.LookAt(PredictPosition(sight.player));
+        gunPoint.LookAt(PredictPosition(sight.player));
+        gunPoint2.LookAt(PredictPosition(sight.player));
 
         if(enemyType == EnemyType.BurstBlaster) {
             if(canShoot) {

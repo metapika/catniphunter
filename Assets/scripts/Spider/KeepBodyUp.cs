@@ -15,7 +15,7 @@ public class KeepBodyUp : MonoBehaviour
         if(Physics.Raycast(transform.position + positiveOffset, -Vector3.up, out hit, 1000f, env))
         {
             //float distanceFromGround = Vector3.Distance(transform.position, hit.point);
-            Vector3 offset = new Vector3(0f, 0.5f, 0f);
+            Vector3 offset = new Vector3(0f, 0.3f, 0f);
 
             body.position = hit.point + offset;
         }

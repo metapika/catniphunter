@@ -17,8 +17,10 @@ public class EnemyDetector : MonoBehaviour
     private void OnTriggerExit(Collider other) {
         if (other.CompareTag("Enemy"))
         {
-            if (player.targets.Contains(other.transform))
+            if (player.targets.Contains(other.transform)) {
                 player.targets.Remove(other.transform);
+                player.AddIndex(0, player.targets.Count);
+            }
         }
     }
 }

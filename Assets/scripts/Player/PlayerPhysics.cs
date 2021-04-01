@@ -9,6 +9,7 @@ public class PlayerPhysics : MonoBehaviour
     public bool useGravity = true;
     public float gravity = -39.24f;
     public float currentGravity;
+    public float pushPower = 5f;
     [SerializeField] private int gravityScale = 1;
     [SerializeField] private float jumpRaycastDistance = 1.2f;
     [SerializeField] private LayerMask whatIsGround;
@@ -87,16 +88,16 @@ public class PlayerPhysics : MonoBehaviour
     }
 
     private void OnControllerColliderHit(ControllerColliderHit hit) {
-        if(velocity.y < 0) {
-            if(hit.gameObject.layer == 8 && velocity.y < 0)
-            {
-                velocity.x = 0f;
-                velocity.z = 0f;
-            }
-            if(IsGrounded()) {
-                velocity.y = 0f;
-            }
-        }
+        // if(velocity.y < 0) {
+        //     if(hit.gameObject.layer == 8 && velocity.y < 0)
+        //     {
+        //         velocity.x = 0f;
+        //         velocity.z = 0f;
+        //     }
+        //     if(IsGrounded()) {
+        //         velocity.y = 0f;
+        //     }
+        // }
 
         if (hit.moveDirection.y < -0.9 && hit.normal.y > 0.41)
         {
@@ -112,6 +113,30 @@ public class PlayerPhysics : MonoBehaviour
         {
             activePlatform = null;
         }
+
+        Rigidbody body = hit.collider.attachedRigidbody;
+
+        // no rigidbody
+        if (body == null || body.isKinematic)
+        {
+            return;
+        }
+
+        // We dont want to push objects below us
+        if (hit.moveDirection.y < -0.3)
+        {
+            return;
+        }
+
+        // Calculate push direction from move direction,
+        // we only push objects to the sides never up and down
+        Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
+
+        // If you know how fast your character is trying to move,
+        // then you can also multiply the push velocity by that.
+
+        // Apply the push
+        body.velocity = pushDir * pushPower;
     }
 
     #endregion
