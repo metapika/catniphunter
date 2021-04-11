@@ -3,49 +3,61 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using DG.Tweening;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class PlayerCombat : MonoBehaviour
 {
     #region Fields
+    public bool canDetectEnemies = true;
     public Transform currentAbilities;
     public GameObject currentWeapon;
     public Transform weaponCase;
     public Transform weaponHand;
     public Transform weaponHand2;
-    public Transform cameraTarget;
     public Transform knifeThrowPoint;
     public GameObject crossair;
     public float offsetToDashedEnemy = 1.2f;
     public float minOffsetToDash = 0.2f;
-    public Vector3 offset = new Vector3(0, .8f, 0);
+    
+    [Space]
 
-    public bool canDetectEnemies = true;
+    public float parryTime = 0.35f;
+    public float parrySpeed = 15f;
+    public ParticleSystem dodgeParticles;
+    public float distortionAmount = 0.4f;
+    public Volume volume;
+    private LensDistortion dodgeDistortion;
+
     public List<Transform> targets;
     public int targetIndex;
     public int lockOnTargetIndex;
+    public float lockOnSmoothness = 30f;
     public LayerMask maskForCoverCheck;
     private bool targetNotBehindCover;
 
     private CharacterController controller;
     private PlayerPhysics pphysics;
     private PlayerController movement;
-    private PlayerStats stats;
     private Animator anim;
     private AbilityManager abilityList;
     private CameraController camControl;
-    private static readonly int hashSpeedPercentage = Animator.StringToHash("SpeedPercentage");
 
     #endregion
 
     #region Unity Functions
     private void Awake() {
         controller = GetComponent<CharacterController>();
+
         movement = GetComponent<PlayerController>();
         pphysics = GetComponent<PlayerPhysics>();
-        stats = GetComponent<PlayerStats>();
+
         anim = GetComponent<Animator>();
+
         camControl = Camera.main.GetComponent<CameraController>();
         abilityList = currentAbilities.GetComponent<AbilityManager>();
+
+        volume.profile.TryGet(out dodgeDistortion);
 
         currentWeapon = GetObtainedWeapons();
 
@@ -93,20 +105,33 @@ public class PlayerCombat : MonoBehaviour
             }
         }
     }
+    
     #endregion
 
     #region Custom Functions
-    public void AddIndex(int amount, int max) {
-        if ((lockOnTargetIndex += amount) >= max) {
-            lockOnTargetIndex -= max;
-            return;
+    private IEnumerator Dodge() {
+        float startTime = Time.time;
+
+        if (volume != null) {
+            dodgeDistortion.intensity.value = distortionAmount;
         }
 
-        if (lockOnTargetIndex >= 0) {
-            return;
-        }
+        // Invincibility
+        // transform.root.gameObject.GetComponent<PlayerStats>().enabled = false;
 
-        lockOnTargetIndex = max + lockOnTargetIndex;
+        while(Time.time < startTime + parryTime)
+        {
+            movement.controller.Move(movement.moveDir * parrySpeed * Time.deltaTime);
+            
+            yield return null;
+        }
+        
+        transform.root.gameObject.GetComponent<PlayerStats>().enabled = true;
+        dodgeParticles.gameObject.SetActive(false);
+
+        if (volume != null){
+            dodgeDistortion.intensity.value = 0f;
+        }
     }
     private void TargetDetection() {
         if(!canDetectEnemies) return;
@@ -118,7 +143,7 @@ public class PlayerCombat : MonoBehaviour
         {
             targetIndex = NearestTargetToCenter();
             
-            if(!camControl.CameraToggleState()) lockOnTargetIndex = NearestTargetToCenter();
+            // if(!camControl.CameraToggleState()) lockOnTargetIndex = NearestTargetToCenter();
 
             RaycastHit hit;
             Vector3 direction = Vector3.zero;
@@ -139,11 +164,11 @@ public class PlayerCombat : MonoBehaviour
             }
 
             if(targetNotBehindCover && camControl.CameraToggleState()) {
-                int rotSpeed = 1;
-                Vector3 dir = targets[lockOnTargetIndex].position - transform.position;
-                dir.y = 0f;
+                Vector3 lookDirection = targets[lockOnTargetIndex].transform.position - transform.position;
+                Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
+                Quaternion lookAt = Quaternion.RotateTowards(transform.rotation, targetRotation, Time.deltaTime * lockOnSmoothness);
 
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(dir), Time.time * rotSpeed);
+                transform.rotation = lookAt;
             }
         } else if(camControl.CameraToggleState()) {
             camControl.ToggleCameraLockOn();
@@ -188,12 +213,24 @@ public class PlayerCombat : MonoBehaviour
         }
         return index;
     }
-
     public Vector3 TargetOffset(int index)
     {
         Vector3 position;
+        Vector3 offset = new Vector3(0, .7f, 0);
         position = targets[index].position + offset;
         return Vector3.MoveTowards(position, transform.position, offsetToDashedEnemy);
+    }
+    public void AddIndex(int amount, int max) {
+        if ((lockOnTargetIndex += amount) >= max) {
+            lockOnTargetIndex -= max;
+            return;
+        }
+
+        if (lockOnTargetIndex >= 0) {
+            return;
+        }
+
+        lockOnTargetIndex = max + lockOnTargetIndex;
     }
     private void EquipWeapon(GameObject weapon) {
         currentWeapon = weapon;

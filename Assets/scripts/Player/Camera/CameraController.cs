@@ -1,6 +1,9 @@
-﻿using System.Collections;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class CameraController : MonoBehaviour
 {
@@ -12,12 +15,17 @@ public class CameraController : MonoBehaviour
 
     [Space]
 
-    public float maxLockOnDistance = 12;
     [SerializeField] private float sensitivityX = 10;
     [SerializeField] private float sensitivityY = 10;
-    [SerializeField] private Transform characterCenter;
+    [SerializeField] private  Transform characterCenter;
+    [SerializeField] private float lockOnVignette = 0.4f;
+    [SerializeField] private LayerMask envoriementMask;
+    public Volume v;
+    private float defaultVignette;
+    private Vignette cameraVignette;
 
     private PlayerCombat playerCombat;
+
     private float mouseX, mouseY;
 
     #endregion
@@ -26,8 +34,9 @@ public class CameraController : MonoBehaviour
     private void Awake() {
         playerCombat = transform.root.GetComponent<PlayerCombat>();
 
-        if(!lockCursor) return;
+        v.profile.TryGet(out cameraVignette);
 
+        if(!lockCursor) return;
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }
@@ -36,7 +45,7 @@ public class CameraController : MonoBehaviour
         CameraControl();
         if(playerCombat.targets.Count > 0) {
             if(CameraToggleState()) {CameraLookAt(playerCombat.targets[playerCombat.lockOnTargetIndex]);}
-            else {CameraLookAt(playerCombat.targets[playerCombat.targetIndex]);}
+            else {CameraLookAt(characterCenter);}
         }
     }
 
@@ -55,65 +64,61 @@ public class CameraController : MonoBehaviour
     }
     public void ToggleCameraLockOn()
     {
-        if(lockOnTarget) { lockOnTarget = false; transform.localPosition = new Vector3(0, transform.localPosition.y, transform.localPosition.z); transform.localEulerAngles = Vector3.zero; }
+        if(lockOnTarget) { LockOnOff(); }
         else { HandleCameraLockOn(); }
     }
     private void HandleCameraLockOn()
     {
-        float shortestDistance = Mathf.Infinity;
+        if(playerCombat.targets.Count > 0) {
+                Transform target = playerCombat.targets[playerCombat.lockOnTargetIndex].transform;
+                Vector3 dirToTarget = (target.position - transform.root.position).normalized;
+                if(Vector3.Angle(transform.root.forward, dirToTarget) < 360 / 2) { //Add a viewing angle
+                    float dstToTarget = Vector3.Distance(transform.root.position, target.position);
 
-        if(playerCombat.targetIndex <= playerCombat.targets.Count) {
-            if(playerCombat.targets[playerCombat.targetIndex] != null)
-            {
-                Vector3 lockTargetDirection = transform.root.position - playerCombat.targets[playerCombat.targetIndex].position;
-                float distanceFromTarget = Vector3.Distance(transform.root.position, playerCombat.targets[playerCombat.targetIndex].position);
-                float viewableAngle = Vector3.Angle(lockTargetDirection, Camera.main.transform.forward);
+                    if(!Physics.Raycast(transform.root.position, dirToTarget, dstToTarget, envoriementMask)) 
+                    {
+                        // characterCenter.eulerAngles = Vector3.zero;
+                        // transform.eulerAngles = Vector3.zero;
+                        transform.localPosition = new Vector3(1, transform.localPosition.y, transform.localPosition.z);
+                        cameraVignette.intensity.value = lockOnVignette;
+                        lockOnTarget = true;
 
-                if(transform.root != playerCombat.targets[playerCombat.targetIndex].root 
-                    && viewableAngle > -50 &&  viewableAngle > 50 
-                    && distanceFromTarget <= maxLockOnDistance)
-                {
-                    transform.localPosition = new Vector3(1, transform.localPosition.y, transform.localPosition.z);
-                    lockOnTarget = true;
+                    } else {
+                        LockOnOff();
+                    }
                 }
-
-                if(distanceFromTarget < shortestDistance)
-                {
-                    shortestDistance = distanceFromTarget;
-                }
-            }
         } else {
-            lockOnTarget = false;
-            transform.localPosition = new Vector3(0, transform.localPosition.y, transform.localPosition.z);
-            transform.localEulerAngles = Vector3.zero;
+            LockOnOff();
         }
     }
+
+    private void LockOnOff()
+    {
+        lockOnTarget = false;
+        transform.localPosition = new Vector3(0, transform.localPosition.y, transform.localPosition.z);
+        // transform.localEulerAngles = Vector3.zero;
+
+        cameraVignette.intensity.value = defaultVignette;
+    }
+
     public bool CameraToggleState()
     {
         return lockOnTarget;
     }
     private void CameraLookAt(Transform target){
-        if(!lockOnTarget || !(playerCombat.lockOnTargetIndex > 0) && !(playerCombat.lockOnTargetIndex < playerCombat.targets.Count)) {
+        if(!lockOnTarget) {
+            //Normal camera
             transform.LookAt(characterCenter);
             return;
         }
 
-        int speed = 1;
+        Vector3 direction = playerCombat.targets[playerCombat.lockOnTargetIndex].transform.position - transform.position;
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+        Quaternion lookAt = Quaternion.RotateTowards(transform.rotation, targetRotation, Time.deltaTime * playerCombat.lockOnSmoothness);
 
-        Vector3 dir = target.position - transform.position;
-        dir.Normalize();
-        Quaternion camRotation = Quaternion.LookRotation(dir);
+        characterCenter.rotation = lookAt;
 
-        // CAMERA
-        transform.rotation = Quaternion.Slerp(transform.rotation, camRotation, speed * Time.deltaTime);   
 
-        dir = target.position - characterCenter.position;
-        dir.Normalize();
-        Quaternion centerRotation = Quaternion.LookRotation(dir);
-
-        // HANDLE
-        characterCenter.rotation = Quaternion.Slerp(characterCenter.transform.rotation, centerRotation, speed * Time.deltaTime);   
-        
-        targetIndicator.position = target.position + new Vector3(0, 2, 0);
+        targetIndicator.position = target.position + new Vector3(0, 1.5f, 0);
     }
 }

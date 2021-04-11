@@ -30,7 +30,6 @@ public class KnifeThrowAbility : MonoBehaviour
         anim = transform.root.GetComponent<Animator>();
         line = GetComponent<LineRenderer>();
 
-        target = combat.cameraTarget;
         knifeThrowPoint = combat.knifeThrowPoint;
     }
     private void Update() {

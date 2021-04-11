@@ -13,7 +13,7 @@ public class PlayerPhysics : MonoBehaviour
     [SerializeField] private int gravityScale = 1;
     [SerializeField] private float jumpRaycastDistance = 1.2f;
     [SerializeField] private LayerMask whatIsGround;
-    [HideInInspector] public Vector3 velocity;
+    public Vector3 velocity;
 
     private float mass = 1f;
     private Vector3 impact = Vector3.zero;
@@ -98,6 +98,10 @@ public class PlayerPhysics : MonoBehaviour
         //         velocity.y = 0f;
         //     }
         // }
+        if(IsGrounded() && velocity.y < 0) {
+            velocity.y = 0f;
+        }
+
 
         if (hit.moveDirection.y < -0.9 && hit.normal.y > 0.41)
         {

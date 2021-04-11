@@ -27,14 +27,13 @@ public class BulletBase: MonoBehaviour
         
         for (int i = 0; i < hits.Length; i++)
         {
+
             if(!hits[i].collider.gameObject.CompareTag("Player") && !hits[i].collider.gameObject.CompareTag("Enemy")) {
-                //Instantiate(hitParticles, transform.position, Quaternion.identity);
                 if(hits[i].collider.gameObject.CompareTag("Shield"))
                 {
                     hits[i].transform.GetComponent<Shield>().BlockDamage(bulletDamage);
+                    Destroy(gameObject);
                 }
-                Destroy(gameObject);
-                return;
             } else if(hits[i].collider.gameObject.CompareTag("Player")) 
             {
                 hits[i].transform.GetComponent<PlayerStats>().TakeDamage(bulletDamage);
@@ -42,6 +41,7 @@ public class BulletBase: MonoBehaviour
                 return;
             }
         }
+        //Instantiate(hitParticles, transform.position, Quaternion.identity);
     }
 
     public IEnumerator DestroyBullet() {

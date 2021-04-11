@@ -12,7 +12,9 @@ GameObject:
   - component: {fileID: 1010838789537067244}
   - component: {fileID: 6756399683203172473}
   - component: {fileID: 3711708445199816681}
+  - component: {fileID: -11699581989796820}
   - component: {fileID: 613142901226651718}
+  - component: {fileID: 6562910132245684732}
   m_Layer: 13
   m_Name: BlasterBullet
   m_TagString: Bullet
@@ -95,11 +97,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b946f8299086ac03aa9f7f063bae0bd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletSpeed: 100
-  bulletRemoveTime: 4
+  bulletSpeed: 1
+  bulletRemoveTime: 50
   bulletDamage: 5
   hitParticles: {fileID: 721811861951029676, guid: 780ea90b0d770284d971fb32abf0a9fe, type: 3}
   prevPos: {x: 0, y: 0, z: 0}
+--- !u!54 &-11699581989796820
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1415339536737916188}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!96 &613142901226651718
 TrailRenderer:
   serializedVersion: 2
@@ -207,3 +225,16 @@ TrailRenderer:
   m_MinVertexDistance: 0.1
   m_Autodestruct: 0
   m_Emitting: 1
+--- !u!65 &6562910132245684732
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1415339536737916188}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.0000004, y: 1.0000002, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
