@@ -9,6 +9,8 @@ public class Melee : MonoBehaviour
     public Weapon_SO weaponDefinition;
     public float[] attacksKnockBackStrenght = new float[3];
     public bool canAttack;
+    public float timeStopDuration = 0.1f;
+    public float minKnifeKillDistance = 0.3f;
     public ParticleSystem trail;
     public GameObject hitParticles;
     private PlayerCombat combat;
@@ -45,10 +47,17 @@ public class Melee : MonoBehaviour
 
     private void OnTriggerEnter(Collider other) {
         if(other.CompareTag("Enemy")) {
-            if(!other.GetComponent<SpiderStats>().gettingKnockbacked && !other.GetComponent<SpiderStats>().dead) {
-                other.GetComponent<SpiderStats>().TakeDamage(weaponDefinition.damage, transform.root);
+            SpiderStats enemy = other.GetComponent<SpiderStats>();
+            if(!enemy.dead) {
+                enemy.TakeDamage(weaponDefinition.damage, transform.root);
                 Instantiate(hitParticles, other.ClosestPoint(transform.position), transform.rotation);
-                StartCoroutine(other.GetComponent<SpiderStats>().Knockback(transform, attacksKnockBackStrenght[attacknum -1]));
+                combat.Stop(timeStopDuration);
+
+                // if(!other.GetComponent<SpiderStats>().gettingKnockbacked && !other.GetComponent<SpiderStats>().dead) {
+                //     other.GetComponent<SpiderStats>().TakeDamage(weaponDefinition.damage, transform.root);
+                //     Instantiate(hitParticles, other.ClosestPoint(transform.position), transform.rotation);
+                //     StartCoroutine(other.GetComponent<SpiderStats>().Knockback(transform, attacksKnockBackStrenght[attacknum -1]));
+                // }
             }
         }
         if(other.CompareTag("VentOpening")) {
@@ -65,6 +74,17 @@ public class Melee : MonoBehaviour
         if(attacknum == 4)
         {
             attacknum = 1;
+        }
+
+        if(weaponDefinition.weaponType == Weapon_SO.WeaponType.Knife) {
+            if(combat.targets.Count > 0) {
+                if(combat.camControl.CameraToggleState() && Vector3.Distance(transform.root.position, combat.targets[combat.lockOnTargetIndex].position) > minKnifeKillDistance) {
+                    return;
+                } 
+                else if(!combat.camControl.CameraToggleState() && Vector3.Distance(transform.root.position, combat.targets[combat.targetIndex].position) > minKnifeKillDistance) {
+                    return;
+                }
+            }
         }
         
         if(canAttack) {
@@ -101,14 +121,14 @@ public class Melee : MonoBehaviour
     
     public void EquipSword() {
         if(weaponDefinition.weaponType == Weapon_SO.WeaponType.Katana) {
-            transform.SetParent(combat.weaponHand);
-            transform.position = combat.weaponHand.position;
-            transform.rotation = combat.weaponHand.rotation;
+            transform.SetParent(combat.handR);
+            transform.position = combat.handR.position;
+            transform.rotation = combat.handR.rotation;
         }
 
         if(weaponDefinition.weaponType == Weapon_SO.WeaponType.DoubleSwords) {
-            sword1.SetParent(combat.weaponHand);
-            sword2.SetParent(combat.weaponHand2);
+            sword1.SetParent(combat.handR);
+            sword2.SetParent(combat.handL);
 
             sword1.localPosition = new Vector3(0.008f, -0.008f, 0.008f);
             sword1.localEulerAngles = new Vector3(-48.504f, -23.417f, 52.46f);

@@ -10,12 +10,16 @@ public class SpiderStats : MonoBehaviour
     public GameObject hitText;
     public bool gettingKnockbacked = false;
     public float knockbackTime = 0.3f;
+    public float confusionTime = 1f;
+    public bool confused = false;
     public LegReferences legs;
     public Material disintegrationMaterial;
     public List<Transform> materialModels = new List<Transform>();
     float materialAmount;
     public Transform playerVar;
     private NavMeshAgent agent;
+    private SpiderShoot shoot;
+    private SpiderMovement movement;
     private void Update() {
         if(dead) {
             materialAmount += Time.deltaTime / 2;
@@ -30,6 +34,9 @@ public class SpiderStats : MonoBehaviour
     }
     void Awake() {
         agent = GetComponent<NavMeshAgent>();
+        shoot = GetComponent<SpiderShoot>();
+        movement = GetComponent<SpiderMovement>();
+        
         currentHealth = maxHealth;
     }
     public void TakeDamage(int amount, Transform player = null)
@@ -46,6 +53,22 @@ public class SpiderStats : MonoBehaviour
         if(hitText != null)
             ShowFloatingText(amount.ToString());
         
+    }
+    public IEnumerator Confusion()
+    {
+        if(shoot) {
+            confused = true;
+            shoot.enabled = false;
+            movement.enabled = false;
+        }
+
+        yield return new WaitForSeconds(confusionTime);
+
+        if(shoot) {
+            confused = false;
+            shoot.enabled = true;
+            movement.enabled = true;
+        }
     }
     private void ShowFloatingText(string amount) {
         Instantiate(hitText, transform.position, Quaternion.identity);

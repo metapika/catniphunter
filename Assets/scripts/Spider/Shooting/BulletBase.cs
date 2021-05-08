@@ -8,6 +8,7 @@ public class BulletBase: MonoBehaviour
     public float bulletRemoveTime = 4f; 
     public int bulletDamage;
     public GameObject hitParticles;
+    public Transform enemy;
 
     public Vector3 prevPos;
     
@@ -36,7 +37,7 @@ public class BulletBase: MonoBehaviour
                 }
             } else if(hits[i].collider.gameObject.CompareTag("Player")) 
             {
-                hits[i].transform.GetComponent<PlayerStats>().TakeDamage(bulletDamage);
+                hits[i].transform.GetComponent<PlayerStats>().ParryDecision(bulletDamage, enemy);
                 Destroy(gameObject);
                 return;
             }

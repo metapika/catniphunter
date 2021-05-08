@@ -10,25 +10,30 @@ public class PlayerCombat : MonoBehaviour
 {
     #region Fields
     public bool canDetectEnemies = true;
-    public Transform currentAbilities;
     public GameObject currentWeapon;
     public Transform weaponCase;
-    public Transform weaponHand;
-    public Transform weaponHand2;
-    public Transform knifeThrowPoint;
+    public Transform handR;
+    public Transform handL;
     public GameObject crossair;
-    public float offsetToDashedEnemy = 1.2f;
-    public float minOffsetToDash = 0.2f;
+    public Transform currentAbilities;
     
     [Space]
 
+    public bool canParry;
     public float parryTime = 0.35f;
     public float parrySpeed = 15f;
-    public ParticleSystem dodgeParticles;
-    public float distortionAmount = 0.4f;
+    public float parryTimerReset = 0.5f;
+    public float fovChange = 65f;
+    public float maxWallCheckDistance = 1f;
+    public LayerMask obstacleMask;
     public Volume volume;
     private LensDistortion dodgeDistortion;
+    public float offsetToDashedEnemy = 1.2f;
+    public float minOffsetToDash = 0.2f;
+    public ParticleSystem dashParticles;
 
+    [Space]
+    
     public List<Transform> targets;
     public int targetIndex;
     public int lockOnTargetIndex;
@@ -41,7 +46,8 @@ public class PlayerCombat : MonoBehaviour
     private PlayerController movement;
     private Animator anim;
     private AbilityManager abilityList;
-    private CameraController camControl;
+    private Camera mainCam;
+    [HideInInspector] public CameraController camControl;
 
     #endregion
 
@@ -54,7 +60,9 @@ public class PlayerCombat : MonoBehaviour
 
         anim = GetComponent<Animator>();
 
-        camControl = Camera.main.GetComponent<CameraController>();
+        mainCam = Camera.main;
+
+        camControl = mainCam.GetComponent<CameraController>();
         abilityList = currentAbilities.GetComponent<AbilityManager>();
 
         volume.profile.TryGet(out dodgeDistortion);
@@ -70,21 +78,27 @@ public class PlayerCombat : MonoBehaviour
             }
         }
     }
+    Coroutine parryTimerCoroutine;
     private void Update() {
         TargetDetection();
+
+        LockOnIndexing();
 
         if(Input.GetKeyDown(KeyCode.R) && targetNotBehindCover && targets.Count > 0)
         {
             camControl.ToggleCameraLockOn();
         }
+        
         if(camControl.CameraToggleState()) {
-            if(Input.GetKeyDown(KeyCode.Q))
+            if(Input.GetKeyDown(KeyCode.LeftShift))
             {
-                AddIndex(-1, targets.Count);
-            } 
-            else if(Input.GetKeyDown(KeyCode.E)) 
-            {
-                AddIndex(1, targets.Count);
+                if(parryTimerCoroutine == null) 
+                {
+                    parryTimerCoroutine =  StartCoroutine(ButtonClicked(parryTimerReset));
+                } else {
+                    StopCoroutine(parryTimerCoroutine);
+                    parryTimerCoroutine =  StartCoroutine(ButtonClicked(parryTimerReset));
+                }
             }
         }
     }
@@ -109,29 +123,96 @@ public class PlayerCombat : MonoBehaviour
     #endregion
 
     #region Custom Functions
-    private IEnumerator Dodge() {
-        float startTime = Time.time;
+    private void LockOnIndexing()
+    {
+        if(camControl.CameraToggleState() && targets.Count > 0) {
+        
+            if(Input.GetKeyDown(KeyCode.Q))
+            {
+                float[] distances = new float[targets.Count];
 
-        if (volume != null) {
-            dodgeDistortion.intensity.value = distortionAmount;
+                for (int i = 0; i < targets.Count; i++)
+                {
+                    distances[i] = transform.InverseTransformPoint(targets[i].position).x;
+                }
+
+                System.Array.Sort(distances);
+                //This is now sorted out from left to right
+
+                // if (relativePoint.x < 0.0)
+                //     print ("Object is to the left");
+                // else if (relativePoint.x > 0.0)
+                //     print ("Object is to the right");
+                // else
+                //     print ("Object is directly ahead");
+                // AddIndex(-1, targets.Count);
+            } 
+            else if(Input.GetKeyDown(KeyCode.E)) 
+            {
+                AddIndex(1, targets.Count);
+            }
+
         }
+    }
+    bool waiting;
+    float cameraFov;
+    public void Stop(float duration)
+    {
+        if(waiting) return;
 
+        cameraFov = mainCam.fieldOfView;
+        mainCam.fieldOfView = fovChange;
+        Time.timeScale = 0.0f;
+        StartCoroutine(Wait(duration));
+    }
+    private IEnumerator Wait(float duration)
+    {
+        waiting = true;
+        yield return new WaitForSecondsRealtime(duration);
+        mainCam.fieldOfView = cameraFov;
+        Time.timeScale = 1.0f;
+        waiting = false;
+    }
+    private IEnumerator ButtonClicked(float time)
+    {
+        canParry = true;
+
+        yield return new WaitForSeconds(time);
+
+        canParry = false;
+
+    }
+    public IEnumerator Dodge() {
+        float startTime = Time.time;
+        Vector3 direction = transform.right;
+        
+        dashParticles.Play();
+        Stop(0.2f);
+
+        // if (volume != null) {
+        //     dodgeDistortion.intensity.value = distortionAmount;
+        // }
+        
         // Invincibility
         // transform.root.gameObject.GetComponent<PlayerStats>().enabled = false;
 
+        if(!Physics.Raycast(transform.position, transform.right, maxWallCheckDistance, obstacleMask)) {
+            direction = transform.right;
+        } else if(!Physics.Raycast(transform.position, -transform.right, maxWallCheckDistance, obstacleMask)) {
+            direction = -transform.right;
+        }
+
         while(Time.time < startTime + parryTime)
         {
-            movement.controller.Move(movement.moveDir * parrySpeed * Time.deltaTime);
+            movement.controller.Move(direction * parrySpeed * Time.deltaTime);
             
             yield return null;
         }
-        
-        transform.root.gameObject.GetComponent<PlayerStats>().enabled = true;
-        dodgeParticles.gameObject.SetActive(false);
 
-        if (volume != null){
-            dodgeDistortion.intensity.value = 0f;
-        }
+        // if (volume != null){
+        //     dodgeDistortion.intensity.value = 0f;
+        // }
+        dashParticles.Stop();
     }
     private void TargetDetection() {
         if(!canDetectEnemies) return;
@@ -168,7 +249,7 @@ public class PlayerCombat : MonoBehaviour
                 Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
                 Quaternion lookAt = Quaternion.RotateTowards(transform.rotation, targetRotation, Time.deltaTime * lockOnSmoothness);
 
-                transform.rotation = lookAt;
+                transform.rotation = new Quaternion(transform.rotation.x, lookAt.y, transform.rotation.z, lookAt.w);
             }
         } else if(camControl.CameraToggleState()) {
             camControl.ToggleCameraLockOn();
@@ -247,18 +328,22 @@ public class PlayerCombat : MonoBehaviour
         GameObject selectedWeapon = null;
 
         foreach (Transform possibleWeapon in weaponCase) {
-            if(possibleWeapon.CompareTag("Weapon") || possibleWeapon.CompareTag("Melee")) {
-                selectedWeapon = possibleWeapon.gameObject;
-                return selectedWeapon;
+            if(possibleWeapon.gameObject.activeSelf) {
+                if(possibleWeapon.CompareTag("Weapon") || possibleWeapon.CompareTag("Melee")) {
+                    selectedWeapon = possibleWeapon.gameObject;
+                    return selectedWeapon;
+                }
             }
         }
 
         if(selectedWeapon == null) {
-            foreach (Transform possibleWeapon in weaponHand) {
-                if(possibleWeapon.CompareTag("Weapon") || possibleWeapon.CompareTag("Melee")) {
-                    if(selectedWeapon == null) {
-                        selectedWeapon = possibleWeapon.gameObject;
-                        return selectedWeapon;
+            foreach (Transform possibleWeapon in handR) {
+                if(possibleWeapon.gameObject.activeSelf) {
+                    if(possibleWeapon.CompareTag("Weapon") || possibleWeapon.CompareTag("Melee")) {
+                        if(selectedWeapon == null) {
+                            selectedWeapon = possibleWeapon.gameObject;
+                            return selectedWeapon;
+                        }
                     }
                 }
             } 
@@ -297,9 +382,9 @@ public class PlayerCombat : MonoBehaviour
         }
     }
     public void StartCombo() {
-        if(currentWeapon.GetComponent<Melee>().weaponDefinition.weaponType == Weapon_SO.WeaponType.Katana) {
+        if(currentWeapon.GetComponent<Melee>().weaponDefinition.weaponType == Weapon_SO.WeaponType.Katana)
             currentWeapon.GetComponent<Melee>().trail.Play();
-        }
+        
         if(targets.Count > 0)
         {
             if(camControl.CameraToggleState()) MoveTowardsTarget(lockOnTargetIndex);
@@ -308,7 +393,6 @@ public class PlayerCombat : MonoBehaviour
 
         currentWeapon.GetComponent<Melee>().canAttack = false;
         movement.canMove = false;
-        anim.SetBool("inCombat", true);
     }
     public void StopCombo() {
         if(currentWeapon.GetComponent<Melee>().weaponDefinition.weaponType == Weapon_SO.WeaponType.Katana) {

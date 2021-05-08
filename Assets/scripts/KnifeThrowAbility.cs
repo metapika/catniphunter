@@ -30,7 +30,7 @@ public class KnifeThrowAbility : MonoBehaviour
         anim = transform.root.GetComponent<Animator>();
         line = GetComponent<LineRenderer>();
 
-        knifeThrowPoint = combat.knifeThrowPoint;
+        //knifeThrowPoint = combat.knifeThrowPoint;
     }
     private void Update() {
         KnifeAbility();
@@ -88,7 +88,7 @@ public class KnifeThrowAbility : MonoBehaviour
             if(canShoot) {
                 line.enabled = true;
                 if(knifeObj == null) {
-                    knifeObj = Instantiate(knifePrefab, combat.weaponHand.position, new Quaternion(0, 0, 0, 0), combat.weaponHand);
+                    knifeObj = Instantiate(knifePrefab, combat.handR.position, new Quaternion(0, 0, 0, 0), combat.handR);
                 }
             } else {
                 line.enabled = false;

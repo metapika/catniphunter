@@ -78,6 +78,9 @@ public class SpiderShoot : MonoBehaviour
                 
             bullet1.bulletDamage = damage;
             bullet2.bulletDamage = damage;
+
+            bullet1.enemy = transform;
+            bullet2.enemy = transform;
             yield return new WaitForSeconds(timeBetweenBursts);
         }
         

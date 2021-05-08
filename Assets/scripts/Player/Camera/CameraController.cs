@@ -19,6 +19,7 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float sensitivityY = 10;
     [SerializeField] private  Transform characterCenter;
     [SerializeField] private float lockOnVignette = 0.4f;
+    [SerializeField] private float vignetteTime = 1f;
     [SerializeField] private LayerMask envoriementMask;
     public Volume v;
     private float defaultVignette;
@@ -80,7 +81,7 @@ public class CameraController : MonoBehaviour
                         // characterCenter.eulerAngles = Vector3.zero;
                         // transform.eulerAngles = Vector3.zero;
                         transform.localPosition = new Vector3(1, transform.localPosition.y, transform.localPosition.z);
-                        cameraVignette.intensity.value = lockOnVignette;
+                        StartCoroutine(Lerp(vignetteTime, cameraVignette.intensity.value, cameraVignette.intensity.value, lockOnVignette));
                         lockOnTarget = true;
 
                     } else {
@@ -91,14 +92,27 @@ public class CameraController : MonoBehaviour
             LockOnOff();
         }
     }
+    private IEnumerator Lerp(float time, float value, float startValue, float targetValue)
+    {
+        float start = Time.time;
+
+        while (Time.time < start + time)
+        {
+            float completion = (Time.time - start) / time;
+            cameraVignette.intensity.value = Mathf.Lerp(startValue, targetValue, completion);
+            yield return null;
+        }
+
+        cameraVignette.intensity.value = targetValue;
+    }
 
     private void LockOnOff()
     {
         lockOnTarget = false;
         transform.localPosition = new Vector3(0, transform.localPosition.y, transform.localPosition.z);
         // transform.localEulerAngles = Vector3.zero;
-
-        cameraVignette.intensity.value = defaultVignette;
+        
+        StartCoroutine(Lerp(vignetteTime, cameraVignette.intensity.value, cameraVignette.intensity.value, defaultVignette));
     }
 
     public bool CameraToggleState()
