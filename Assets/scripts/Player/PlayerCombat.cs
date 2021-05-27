@@ -129,23 +129,7 @@ public class PlayerCombat : MonoBehaviour
         
             if(Input.GetKeyDown(KeyCode.Q))
             {
-                float[] distances = new float[targets.Count];
-
-                for (int i = 0; i < targets.Count; i++)
-                {
-                    distances[i] = transform.InverseTransformPoint(targets[i].position).x;
-                }
-
-                System.Array.Sort(distances);
-                //This is now sorted out from left to right
-
-                // if (relativePoint.x < 0.0)
-                //     print ("Object is to the left");
-                // else if (relativePoint.x > 0.0)
-                //     print ("Object is to the right");
-                // else
-                //     print ("Object is directly ahead");
-                // AddIndex(-1, targets.Count);
+                AddIndex(-1, targets.Count);
             } 
             else if(Input.GetKeyDown(KeyCode.E)) 
             {

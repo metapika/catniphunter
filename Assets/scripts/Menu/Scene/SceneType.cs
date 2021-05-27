@@ -5,7 +5,8 @@ namespace UnityCore {
         
         public enum SceneType {
             None,
-            Menu,
+            Menus,
+            Hub,
             TestZone
         }
     }

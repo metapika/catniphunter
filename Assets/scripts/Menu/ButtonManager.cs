@@ -14,8 +14,7 @@ namespace UnityCore {
             public PauseMenu PauseMenu;
             public GameObject menuOnly;
 
-            void Start()
-            {
+            void Start() {
                 PageController = GetComponent<PageController>();
             }
 
@@ -35,10 +34,19 @@ namespace UnityCore {
                                      Debug.Log("Scene [" + _scene + "] loaded from the button manager!" );
                                     }, false, PageType.Loading);
             }
+            public void LoadIntoHub() {
+                PageController.TurnPageOff(PageType.ModeSelect);
+                PageController.TurnPageOff(PageType.EndGameScreen);
+                Time.timeScale = 1f;
+                SceneController.Load(SceneType.Hub, (_scene) => {
+                                     Debug.Log("Scene [" + _scene + "] loaded from the button manager!" );
+                                    }, false, PageType.Loading);
+            }
             public void Restart() {
                 PauseMenu.EnableComponents();
-                if(PageController.PageIsOn(PageType.DeathScreen))
-                    PageController.TurnPageOff(PageType.DeathScreen);
+                PageController.TurnPageOff(PageType.DeathScreen);
+                PageController.TurnPageOff(PageType.EndGameScreen);
+
                 string currentSceneName = SceneManager.GetActiveScene().name;
                 SceneManager.LoadScene(currentSceneName);
             }
@@ -46,9 +54,10 @@ namespace UnityCore {
             {
                 PauseMenu.EnableComponents();
                 PageController.TurnPageOff(PageType.DeathScreen);
-                PageController.TurnPageOff(PageType.PauseMenu, PageType.MainMenu);
+                PageController.TurnPageOff(PageType.PauseMenu);
+                PageController.TurnPageOff(PageType.EndGameScreen, PageType.MainMenu);
                 //make the "are you sure" screen
-                SceneController.Load(SceneType.Menu, (_scene) => {
+                SceneController.Load(SceneType.Menus, (_scene) => {
                                      Debug.Log("Scene [" + _scene + "] loaded from the button manager!" );
                                     }, false, PageType.Loading);
             }
@@ -65,7 +74,6 @@ namespace UnityCore {
             public void Quit() {
                 Application.Quit();
             }
-
         }
     }
 }

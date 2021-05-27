@@ -11,7 +11,7 @@ namespace UnityCore {
 #if UNITY_EDITOR
             private void Update() {
                 if(Input.GetKeyUp(KeyCode.M)) {
-                    sceneController.Load(SceneType.Menu, (_scene) => {
+                    sceneController.Load(SceneType.Menus, (_scene) => {
                         Debug.Log("Scene [" + _scene + "] loaded from test script!" );
                     },false, PageType.Loading);
                 }

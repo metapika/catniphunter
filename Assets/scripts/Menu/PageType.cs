@@ -14,7 +14,8 @@ namespace UnityCore {
             IngameUI,
             Customize,
             DeathScreen,
-            MoneyNumber
+            MoneyNumber,
+            EndGameScreen
         }
     }
 }

@@ -22,7 +22,8 @@ public class PauseMenu : MonoBehaviour
     {
         if(SceneController.currentSceneName != "Menu") {
             if(Player == null) {
-                Player = GameObject.Find("RoboSamurai");
+                if(SceneController.currentSceneName != "Hub") Player = GameObject.Find("RoboSamurai");
+                else Player = GameObject.Find("RoboSamurai_Hub");
             }
 
             if(Input.GetButtonDown("Pause"))
@@ -53,10 +54,11 @@ public class PauseMenu : MonoBehaviour
             Camera.main.GetComponent<CameraController>().enabled = true;
         if(Player.GetComponent<PlayerController>() != null)
             Player.GetComponent<PlayerController>().enabled = true;
-        if(Player.GetComponent<PlayerCombat>() != null)
+        if(Player.GetComponent<PlayerCombat>() != null) {
             Player.GetComponent<PlayerCombat>().enabled = true;
-        if(Player.GetComponent<PlayerCombat>().currentAbilities != null)
-            Player.GetComponent<PlayerCombat>().currentAbilities.gameObject.SetActive(true);
+            if(Player.GetComponent<PlayerCombat>().currentAbilities != null)
+                Player.GetComponent<PlayerCombat>().currentAbilities.gameObject.SetActive(true);
+        }
     }
     public void DisableComponents() {
         PageController.TurnPageOn(PageType.PauseMenu);
@@ -65,9 +67,10 @@ public class PauseMenu : MonoBehaviour
             Camera.main.GetComponent<CameraController>().enabled = false;
         if(Player.GetComponent<PlayerController>() != null)
             Player.GetComponent<PlayerController>().enabled = false;
-        if(Player.GetComponent<PlayerCombat>() != null)
+        if(Player.GetComponent<PlayerCombat>() != null) {
             Player.GetComponent<PlayerCombat>().enabled = false;
-        if(Player.GetComponent<PlayerCombat>().currentAbilities != null)
-            Player.GetComponent<PlayerCombat>().currentAbilities.gameObject.SetActive(false);
+            if(Player.GetComponent<PlayerCombat>().currentAbilities != null)
+                Player.GetComponent<PlayerCombat>().currentAbilities.gameObject.SetActive(false);
+        }
     }
 }

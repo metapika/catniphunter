@@ -109,9 +109,10 @@ public class PlayerController : MonoBehaviour
         float calculatedSpeed = 0;
         float targetSpeed = stats.currentSpeed * movementInput.magnitude;
         calculatedSpeed = Mathf.Lerp(0, targetSpeed, speedSmoothTime);
-
-        if(canRotate && desiredMoveDirection != Vector3.zero) {
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(desiredMoveDirection), 0.2f);
+        if(Time.timeScale > 0) {
+            if(canRotate && desiredMoveDirection != Vector3.zero) {
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(desiredMoveDirection), 0.2f);
+            }
         }
         controller.Move(desiredMoveDirection * calculatedSpeed * Time.deltaTime);
 

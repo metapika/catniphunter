@@ -23,6 +23,8 @@ TagManager:
   - Bouncable
   - Cargo
   - VentOpening
+  - LevelEnd
+  - Crate
   layers:
   - Default
   - TransparentFX
@@ -44,7 +46,7 @@ TagManager:
   - WeaponPad
   - Weapon
   - BulletDetection
-  - 
+  - Interactable
   - 
   - 
   - 

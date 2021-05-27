@@ -142,7 +142,8 @@ namespace UnityCore {
             private string SceneTypeToString(SceneType _scene) {
                 switch (_scene) {
                     case SceneType.TestZone: return "TestZone";
-                    case SceneType.Menu: return "Menu";
+                    case SceneType.Menus: return "Menus";
+                    case SceneType.Hub: return "Hub";
                     default:
                         LogWarning("Scene ["+_scene+"] does not contain a string for a valid scene");
                         return string.Empty;
@@ -152,7 +153,8 @@ namespace UnityCore {
             private SceneType StringToSceneType(string _scene) {
                 switch (_scene) {
                     case "TestZone": return SceneType.TestZone;
-                    case "Menu": return SceneType.Menu;
+                    case "Menus": return SceneType.Menus;
+                    case "Hub": return SceneType.Hub;
                     default:
                         LogWarning("Scene ["+_scene+"] does not contain a type for a valid scene");
                         return SceneType.None;

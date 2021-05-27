@@ -17,25 +17,27 @@ public class CameraController : MonoBehaviour
 
     [SerializeField] private float sensitivityX = 10;
     [SerializeField] private float sensitivityY = 10;
-    [SerializeField] private  Transform characterCenter;
+    public Transform characterCenter;
     [SerializeField] private float lockOnVignette = 0.4f;
     [SerializeField] private float vignetteTime = 1f;
     [SerializeField] private LayerMask envoriementMask;
-    public Volume v;
+    public Volume postProcessVolume;
     private float defaultVignette;
     private Vignette cameraVignette;
 
     private PlayerCombat playerCombat;
+    [HideInInspector] public PlayerController controller;
 
     private float mouseX, mouseY;
 
     #endregion
 
     #region Unity Functions
-    private void Awake() {
+    private void Start() {
         playerCombat = transform.root.GetComponent<PlayerCombat>();
+        controller = transform.root.GetComponent<PlayerController>();
 
-        v.profile.TryGet(out cameraVignette);
+        postProcessVolume.profile.TryGet(out cameraVignette);
 
         if(!lockCursor) return;
         Cursor.visible = false;
@@ -43,10 +45,12 @@ public class CameraController : MonoBehaviour
     }
 
     private void LateUpdate() {
-        CameraControl();
-        if(playerCombat.targets.Count > 0) {
-            if(CameraToggleState()) {CameraLookAt(playerCombat.targets[playerCombat.lockOnTargetIndex]);}
-            else {CameraLookAt(characterCenter);}
+        if(Time.timeScale > 0) {
+            CameraControl();
+            if(playerCombat) if(playerCombat.targets.Count > 0) {
+                if(CameraToggleState()) {CameraLookAt(playerCombat.targets[playerCombat.lockOnTargetIndex]);}
+                else {CameraLookAt(characterCenter);}
+            }
         }
     }
 
@@ -71,6 +75,7 @@ public class CameraController : MonoBehaviour
     private void HandleCameraLockOn()
     {
         if(playerCombat.targets.Count > 0) {
+                playerCombat.lockOnTargetIndex = playerCombat.targetIndex;
                 Transform target = playerCombat.targets[playerCombat.lockOnTargetIndex].transform;
                 Vector3 dirToTarget = (target.position - transform.root.position).normalized;
                 if(Vector3.Angle(transform.root.forward, dirToTarget) < 360 / 2) { //Add a viewing angle
