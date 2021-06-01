@@ -48,7 +48,7 @@ public class CameraController : MonoBehaviour
         if(Time.timeScale > 0) {
             CameraControl();
             if(playerCombat) if(playerCombat.targets.Count > 0) {
-                if(CameraToggleState()) {CameraLookAt(playerCombat.targets[playerCombat.lockOnTargetIndex]);}
+                if(CameraToggleState()) {CameraLookAt(playerCombat.lockOnTarget);}
                 else {CameraLookAt(characterCenter);}
             }
         }
@@ -75,8 +75,8 @@ public class CameraController : MonoBehaviour
     private void HandleCameraLockOn()
     {
         if(playerCombat.targets.Count > 0) {
-                playerCombat.lockOnTargetIndex = playerCombat.targetIndex;
-                Transform target = playerCombat.targets[playerCombat.lockOnTargetIndex].transform;
+                playerCombat.lockOnTarget = playerCombat.nearestTarget;
+                Transform target = playerCombat.lockOnTarget;
                 Vector3 dirToTarget = (target.position - transform.root.position).normalized;
                 if(Vector3.Angle(transform.root.forward, dirToTarget) < 360 / 2) { //Add a viewing angle
                     float dstToTarget = Vector3.Distance(transform.root.position, target.position);
@@ -97,6 +97,31 @@ public class CameraController : MonoBehaviour
             LockOnOff();
         }
     }
+
+    private void LockOnOff()
+    {
+        lockOnTarget = false;
+        transform.localPosition = new Vector3(0, transform.localPosition.y, transform.localPosition.z);
+        // transform.localEulerAngles = Vector3.zero;
+        
+        StartCoroutine(Lerp(vignetteTime, cameraVignette.intensity.value, cameraVignette.intensity.value, defaultVignette));
+    }
+    private void CameraLookAt(Transform target){
+        if(!lockOnTarget) {
+            //Normal camera
+            transform.LookAt(characterCenter);
+            return;
+        }
+
+        Vector3 direction = playerCombat.lockOnTarget.position - transform.position;
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+        Quaternion lookAt = Quaternion.RotateTowards(transform.rotation, targetRotation, Time.deltaTime * playerCombat.lockOnSmoothness);
+
+        characterCenter.rotation = lookAt;
+
+
+        targetIndicator.position = target.position + new Vector3(0, 1.5f, 0);
+    }
     private IEnumerator Lerp(float time, float value, float startValue, float targetValue)
     {
         float start = Time.time;
@@ -111,33 +136,8 @@ public class CameraController : MonoBehaviour
         cameraVignette.intensity.value = targetValue;
     }
 
-    private void LockOnOff()
-    {
-        lockOnTarget = false;
-        transform.localPosition = new Vector3(0, transform.localPosition.y, transform.localPosition.z);
-        // transform.localEulerAngles = Vector3.zero;
-        
-        StartCoroutine(Lerp(vignetteTime, cameraVignette.intensity.value, cameraVignette.intensity.value, defaultVignette));
-    }
-
     public bool CameraToggleState()
     {
         return lockOnTarget;
-    }
-    private void CameraLookAt(Transform target){
-        if(!lockOnTarget) {
-            //Normal camera
-            transform.LookAt(characterCenter);
-            return;
-        }
-
-        Vector3 direction = playerCombat.targets[playerCombat.lockOnTargetIndex].transform.position - transform.position;
-        Quaternion targetRotation = Quaternion.LookRotation(direction);
-        Quaternion lookAt = Quaternion.RotateTowards(transform.rotation, targetRotation, Time.deltaTime * playerCombat.lockOnSmoothness);
-
-        characterCenter.rotation = lookAt;
-
-
-        targetIndicator.position = target.position + new Vector3(0, 1.5f, 0);
     }
 }

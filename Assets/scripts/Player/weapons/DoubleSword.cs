@@ -7,7 +7,7 @@ public class DoubleSword : MonoBehaviour
     private void OnTriggerEnter(Collider other) {
         if(other.CompareTag("Enemy")) {
             if(other.name != "EnemyTest") {
-                other.GetComponent<SpiderStats>().TakeDamage(weaponDefinition.damage);
+                other.GetComponent<EnemyStats>().TakeDamage(weaponDefinition.damage);
             }
         }
     }

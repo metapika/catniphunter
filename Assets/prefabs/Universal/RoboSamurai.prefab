@@ -36992,7 +36992,7 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 12
+  m_Radius: 13
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &6075499898477868340
 MonoBehaviour:
@@ -37007,6 +37007,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 8342609393849208478}
+  maxDetectionHeight: 1
+  minDetectionHeight: 1
 --- !u!1 &6075499898488235429
 GameObject:
   m_ObjectHideFlags: 0
@@ -43225,13 +43227,15 @@ MonoBehaviour:
   minOffsetToDash: 0.3
   dashParticles: {fileID: 6075499897445283428}
   targets: []
-  targetIndex: 0
-  lockOnTargetIndex: 0
+  nearestTarget: {fileID: 0}
+  lockOnTarget: {fileID: 0}
+  lockIndex: 0
   lockOnSmoothness: 300
   maskForCoverCheck:
     serializedVersion: 2
     m_Bits: 67841
   camControl: {fileID: 0}
+  enemyDetector: {fileID: 0}
 --- !u!1 &8683537351799692997
 GameObject:
   m_ObjectHideFlags: 0
@@ -43489,7 +43493,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4995140533981461001, guid: 07e71974a807bec1cb405cd3e379359b, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4995140533981461044, guid: 07e71974a807bec1cb405cd3e379359b, type: 3}
       propertyPath: timeStopDuration

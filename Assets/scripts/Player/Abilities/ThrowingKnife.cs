@@ -38,7 +38,7 @@ public class ThrowingKnife : MonoBehaviour
             }
 
             if(hits[i].transform.CompareTag("Enemy")) {
-                hits[i].transform.GetComponent<SpiderStats>().TakeDamage(knifeDamage);
+                hits[i].transform.GetComponent<EnemyStats>().TakeDamage(knifeDamage);
                 Destroy(gameObject);
             }
 

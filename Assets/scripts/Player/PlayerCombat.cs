@@ -35,8 +35,9 @@ public class PlayerCombat : MonoBehaviour
     [Space]
     
     public List<Transform> targets;
-    public int targetIndex;
-    public int lockOnTargetIndex;
+    public Transform nearestTarget;
+    public Transform lockOnTarget;
+    public int lockIndex;
     public float lockOnSmoothness = 30f;
     public LayerMask maskForCoverCheck;
     private bool targetNotBehindCover;
@@ -48,6 +49,7 @@ public class PlayerCombat : MonoBehaviour
     private AbilityManager abilityList;
     private Camera mainCam;
     [HideInInspector] public CameraController camControl;
+    [HideInInspector] public EnemyDetector enemyDetector;
 
     #endregion
 
@@ -79,29 +81,7 @@ public class PlayerCombat : MonoBehaviour
         }
     }
     Coroutine parryTimerCoroutine;
-    private void Update() {
-        TargetDetection();
 
-        LockOnIndexing();
-
-        if(Input.GetKeyDown(KeyCode.R) && targetNotBehindCover && targets.Count > 0)
-        {
-            camControl.ToggleCameraLockOn();
-        }
-        
-        if(camControl.CameraToggleState()) {
-            if(Input.GetKeyDown(KeyCode.LeftShift))
-            {
-                if(parryTimerCoroutine == null) 
-                {
-                    parryTimerCoroutine =  StartCoroutine(ButtonClicked(parryTimerReset));
-                } else {
-                    StopCoroutine(parryTimerCoroutine);
-                    parryTimerCoroutine =  StartCoroutine(ButtonClicked(parryTimerReset));
-                }
-            }
-        }
-    }
     private void OnTriggerEnter(Collider other) {
         if(other.CompareTag("WeaponPad")) {
             WeaponPad pad = other.GetComponent<WeaponPad>();
@@ -198,62 +178,93 @@ public class PlayerCombat : MonoBehaviour
         // }
         dashParticles.Stop();
     }
+    private void Update() {
+        if(camControl.CameraToggleState()) TargetLockOnDetection();
+        else TargetDetection();
+
+        LockOnIndexing();
+
+        if(Input.GetKeyDown(KeyCode.R) && targetNotBehindCover && targets.Count > 0)
+        {
+            camControl.ToggleCameraLockOn();
+        }
+        
+        if(camControl.CameraToggleState()) {
+            if(Input.GetKeyDown(KeyCode.LeftShift))
+            {
+                if(parryTimerCoroutine == null) 
+                {
+                    parryTimerCoroutine =  StartCoroutine(ButtonClicked(parryTimerReset));
+                } else {
+                    StopCoroutine(parryTimerCoroutine);
+                    parryTimerCoroutine =  StartCoroutine(ButtonClicked(parryTimerReset));
+                }
+            }
+        }
+    }
     private void TargetDetection() {
         if(!canDetectEnemies) return;
 
-        if(!camControl.CameraToggleState()) movement.canRotate = true;
-        else if(targetNotBehindCover && camControl.CameraToggleState()) movement.canRotate = false;
+        movement.canRotate = true;
         
         if (targets.Count > 0)
         {
-            targetIndex = NearestTargetToCenter();
-            
-            // if(!camControl.CameraToggleState()) lockOnTargetIndex = NearestTargetToCenter();
+            nearestTarget = targets[NearestTargetToCenter()];
+            lockOnTarget = targets[NearestTargetToCenter()];
 
             RaycastHit hit;
             Vector3 direction = Vector3.zero;
-                 
-            if(camControl.CameraToggleState()) {
-                direction = targets[lockOnTargetIndex].position - transform.position;
-                Physics.Raycast(transform.position, direction, out hit, Vector3.Distance(transform.position, targets[lockOnTargetIndex].position), maskForCoverCheck);
-            }
-            else{
-                direction = targets[targetIndex].position - transform.position;
-                Physics.Raycast(transform.position, direction, out hit, Vector3.Distance(transform.position, targets[targetIndex].position), maskForCoverCheck);
-            }
+
+            direction = nearestTarget.position - transform.position;
+            Physics.Raycast(transform.position, direction, out hit, Vector3.Distance(transform.position, nearestTarget.position), maskForCoverCheck);
 
             if(hit.transform != null)
             {
                 if(hit.transform.gameObject.CompareTag("Enemy")) targetNotBehindCover = true;
                 else targetNotBehindCover = false;
             }
+        }
+    }
+    public void TargetLockOnDetection()
+    {
+        if(!canDetectEnemies) return;
 
-            if(targetNotBehindCover && camControl.CameraToggleState()) {
-                Vector3 lookDirection = targets[lockOnTargetIndex].transform.position - transform.position;
-                Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
-                Quaternion lookAt = Quaternion.RotateTowards(transform.rotation, targetRotation, Time.deltaTime * lockOnSmoothness);
+        movement.canRotate = false;
 
-                transform.rotation = new Quaternion(transform.rotation.x, lookAt.y, transform.rotation.z, lookAt.w);
+        if (targets.Count > 0) {  
+            nearestTarget = targets[NearestTargetToCenter()];
+                
+            RaycastHit hit;
+            Vector3 direction = Vector3.zero;
+
+            direction = lockOnTarget.position - transform.position;
+            Physics.Raycast(transform.position, direction, out hit, Vector3.Distance(transform.position, lockOnTarget.position), maskForCoverCheck);
+            
+            if(hit.transform != null)
+            {
+                if(hit.transform.gameObject.CompareTag("Enemy")) targetNotBehindCover = true;
+                else targetNotBehindCover = false;
             }
-        } else if(camControl.CameraToggleState()) {
+
+            Vector3 lookDirection = lockOnTarget.transform.position - transform.position;
+            Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
+            Quaternion lookAt = Quaternion.RotateTowards(transform.rotation, targetRotation, Time.deltaTime * lockOnSmoothness);
+
+            transform.rotation = new Quaternion(transform.rotation.x, lookAt.y, transform.rotation.z, lookAt.w);
+        } else {
             camControl.ToggleCameraLockOn();
         }
     }
-    public void MoveTowardsTarget(int index, Transform target = null)
+    public void MoveTowardsTarget(Transform target = null)
     {
-        if(target == null) 
-        {
-            target = targets[index];
-        }
-
         if (Vector3.Distance(transform.position, target.position) > minOffsetToDash && Vector3.Distance(transform.position, target.position) < 10)
         {
             if(currentWeapon.GetComponent<Melee>().weaponDefinition.weaponType != Weapon_SO.WeaponType.Knife) {
-                if(camControl.CameraToggleState()) transform.DOMove(TargetOffset(lockOnTargetIndex), .3f);
-                else transform.DOMove(TargetOffset(targetIndex), .3f);
+                if(camControl.CameraToggleState()) transform.DOMove(TargetOffset(lockOnTarget), .3f);
+                else transform.DOMove(TargetOffset(nearestTarget), .3f);
 
                 //if(transform.position.y - targets[index].position.y < 3 && transform.position.y - targets[index].position.y > -3)
-                transform.DOLookAt(new Vector3(targets[index].position.x, transform.position.y, targets[index].position.z), .2f);
+                transform.DOLookAt(new Vector3(nearestTarget.position.x, transform.position.y, nearestTarget.position.z), .2f);
             }
         }
     }
@@ -278,24 +289,27 @@ public class PlayerCombat : MonoBehaviour
         }
         return index;
     }
-    public Vector3 TargetOffset(int index)
+    public Vector3 TargetOffset(Transform target)
     {
         Vector3 position;
         Vector3 offset = new Vector3(0, .7f, 0);
-        position = targets[index].position + offset;
+        position = target.position + offset;
         return Vector3.MoveTowards(position, transform.position, offsetToDashedEnemy);
     }
     public void AddIndex(int amount, int max) {
-        if ((lockOnTargetIndex += amount) >= max) {
-            lockOnTargetIndex -= max;
+        if ((lockIndex += amount) >= max) {
+            lockIndex -= max;
+            lockOnTarget = targets[lockIndex];
             return;
         }
 
-        if (lockOnTargetIndex >= 0) {
+        if (lockIndex >= 0) {
+            lockOnTarget = targets[lockIndex];
             return;
         }
 
-        lockOnTargetIndex = max + lockOnTargetIndex;
+        lockIndex = max + lockIndex;
+        lockOnTarget = targets[lockIndex];
     }
     private void EquipWeapon(GameObject weapon) {
         currentWeapon = weapon;
@@ -371,8 +385,8 @@ public class PlayerCombat : MonoBehaviour
         
         if(targets.Count > 0)
         {
-            if(camControl.CameraToggleState()) MoveTowardsTarget(lockOnTargetIndex);
-            else MoveTowardsTarget(targetIndex);
+            if(camControl.CameraToggleState()) MoveTowardsTarget(lockOnTarget);
+            else MoveTowardsTarget(nearestTarget);
         }
 
         currentWeapon.GetComponent<Melee>().canAttack = false;

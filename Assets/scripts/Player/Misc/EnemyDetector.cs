@@ -5,75 +5,93 @@ public class EnemyDetector : MonoBehaviour
     public PlayerCombat player;
     public float maxDetectionHeight = 1f;
     public float minDetectionHeight = 2f;
-
+    private void Start() {
+        player.enemyDetector = this;
+    }
     private void OnTriggerEnter(Collider other) {
         if (other.CompareTag("Enemy"))
         {
-            AddEnemy(other);
+            AddEnemy(other.transform);
         }
     }   
-    public void AddEnemy(Collider other)
+    public void AddEnemy(Transform other)
     {
-        if(!player.targets.Contains(other.transform)) {
-            player.targets.Add(other.transform);
+        // if(transform.position.y - other.transform.position.y > maxDetectionHeight) return;
 
-            string currentTargetName = player.targets[player.lockOnTargetIndex].name;
+        // else if(transform.position.y - other.transform.position.y < -minDetectionHeight) return;
 
-            SortTargetsList();
+        if(!player.targets.Contains(other)) {
+            int enemyID = 0;
+            if(player.targets.Count > 0) enemyID = player.lockOnTarget.GetInstanceID();
+            
+            player.targets.Add(other);
 
-            for(int i = 0; i < player.targets.Count; i++){
-                if(player.targets[i].name == currentTargetName) {
-                    player.lockOnTargetIndex = i;
-                    break;
+            if(player.targets.Count > 0) {
+
+                SortTargetsList();
+
+                for (int i = 0; i < player.targets.Count; i++)
+                {
+                    if(player.targets[i].GetInstanceID() == enemyID) {
+
+                        player.lockOnTarget = player.targets[i];
+                        break;
+                    }
                 }
-            }
-            if(player.lockOnTargetIndex < 0 || player.lockOnTargetIndex > player.targets.Count) {
-                player.AddIndex(0, player.targets.Count);
             }
         }
     }
     private void OnTriggerExit(Collider other) {
         if (other.CompareTag("Enemy"))
         {
-            RemoveEnemy(other);
+            RemoveEnemy(other.transform);
         }
     }
-    public void RemoveEnemy(Collider other)
+    public void RemoveEnemy(Transform other, bool enemyDead = false)
     {
-        if(player.targets.Contains(other.transform)) {
-
-            string currentTargetName = player.targets[player.lockOnTargetIndex].name;
-
-            SortTargetsList();
-
-            for(int i = 0; i < player.targets.Count; i++){
-                if(player.targets[i].name == currentTargetName) {
-                    player.lockOnTargetIndex = i;
-                    break;
-                }
-            }
-
-            player.targets.Remove(other.transform);
+        if(player.targets.Contains(other)) {
+            int enemyID = 0;
+            if(player.targets.Count > 0) enemyID = player.lockOnTarget.GetInstanceID();
             
-            if(player.lockOnTargetIndex < 0 || player.lockOnTargetIndex > player.targets.Count) {
-                player.AddIndex(0, player.targets.Count);
+            player.targets.Remove(other);
+
+            if(player.targets.Count > 0) {
+                if(enemyDead) {
+                    player.AddIndex(0, player.targets.Count);
+                    return;
+                }
+
+                SortTargetsList();
+
+                for (int i = 0; i < player.targets.Count; i++)
+                {
+                    if(player.targets[i].GetInstanceID() == enemyID) {
+
+                        player.lockOnTarget = player.targets[i];
+                        player.lockIndex = i;
+                        break;
+                    }
+                }
+            } else {
+                player.lockOnTarget = null;
+                player.nearestTarget = null;
             }
         }
     }
-    // if(transform.position.y - other.transform.position.y > maxDetectionHeight) return;
-
-    // else if(transform.position.y - other.transform.position.y < -minDetectionHeight) return;
     private void SortTargetsList()
     {
         player.targets.Sort(SortFunc);
     }
     private int SortFunc(Transform a, Transform b)
     {
-        if(a.position.x < b.position.x)
+        var relativePointA = transform.InverseTransformPoint(a.position);
+        var relativePointB = transform.InverseTransformPoint(b.position);
+
+        if(relativePointA.x < relativePointB.x)
         {
             return -1;
         } 
-        else if(a.position.x > b.position.x)
+        else if(relativePointA.x > relativePointB.x)
         {
             return 1;
         }

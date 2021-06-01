@@ -124,7 +124,7 @@ public class PlayerStats : MonoBehaviour
         if(combat.canParry)
         {
             StartCoroutine(combat.Dodge());
-            StartCoroutine(enemy.GetComponent<SpiderStats>().Confusion());
+            StartCoroutine(enemy.GetComponent<EnemyStats>().Confusion());
         } else {
             TakeDamage(amount);
         }

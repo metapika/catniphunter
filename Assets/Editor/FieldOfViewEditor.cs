@@ -2,11 +2,11 @@ using System.Collections;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor (typeof (SpiderSight))]
+[CustomEditor (typeof (EnemySight))]
 public class FieldOfViewEditor : Editor
 {
     private void OnSceneGUI() {
-        SpiderSight fow = (SpiderSight)target;
+        EnemySight fow = (EnemySight)target;
         Handles.color = Color.white;
         Handles.DrawWireArc (fow.transform.position, Vector3.up, Vector3.forward, 360, fow.viewRadius);
         Vector3 viewAngleA = fow.DirFromAngle(-fow.viewAngle / 2, false);

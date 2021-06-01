@@ -59,7 +59,7 @@ public class ShurikenAbility : MonoBehaviour, IHasCooldown
 
         if(combat.targets.Count > 0)
         {
-            projectileInstance.GetComponent<Shuriken>().target = combat.targets[combat.targetIndex];
+            projectileInstance.GetComponent<Shuriken>().target = combat.nearestTarget.transform;
         } else
         {
             projectileInstance.GetComponent<Shuriken>().target = null;

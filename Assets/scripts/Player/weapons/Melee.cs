@@ -47,7 +47,7 @@ public class Melee : MonoBehaviour
 
     private void OnTriggerEnter(Collider other) {
         if(other.CompareTag("Enemy")) {
-            SpiderStats enemy = other.GetComponent<SpiderStats>();
+            EnemyStats enemy = other.GetComponent<EnemyStats>();
             if(!enemy.dead) {
                 enemy.TakeDamage(weaponDefinition.damage, transform.root);
                 Instantiate(hitParticles, other.ClosestPoint(transform.position), transform.rotation);
@@ -78,10 +78,10 @@ public class Melee : MonoBehaviour
 
         if(weaponDefinition.weaponType == Weapon_SO.WeaponType.Knife) {
             if(combat.targets.Count > 0) {
-                if(combat.camControl.CameraToggleState() && Vector3.Distance(transform.root.position, combat.targets[combat.lockOnTargetIndex].position) > minKnifeKillDistance) {
+                if(combat.camControl.CameraToggleState() && Vector3.Distance(transform.root.position, combat.lockOnTarget.position) > minKnifeKillDistance) {
                     return;
                 } 
-                else if(!combat.camControl.CameraToggleState() && Vector3.Distance(transform.root.position, combat.targets[combat.targetIndex].position) > minKnifeKillDistance) {
+                else if(!combat.camControl.CameraToggleState() && Vector3.Distance(transform.root.position, combat.nearestTarget.position) > minKnifeKillDistance) {
                     return;
                 }
             }
