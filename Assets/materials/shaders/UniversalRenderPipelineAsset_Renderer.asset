@@ -54,3 +54,33 @@ MonoBehaviour:
   m_ShadowTransparentReceive: 1
   m_RenderingMode: 0
   m_AccurateGbufferNormals: 0
+--- !u!114 &1454106392836005594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aaad5c85f2c809042933d794a0ae6d8c, type: 3}
+  m_Name: NewMobileSSPRRendererFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  Settings:
+    ShouldRenderSSPR: 1
+    HorizontalReflectionPlaneHeightWS: -0.53
+    FadeOutScreenBorderWidthVerticle: 0.532
+    FadeOutScreenBorderWidthHorizontal: 0.339
+    ScreenLRStretchIntensity: 4.6
+    ScreenLRStretchThreshold: 0.7
+    TintColor:
+      r: 0.6509434
+      g: 0.6509434
+      b: 0.6509434
+      a: 1
+    RT_height: 1024
+    UseHDR: 1
+    ApplyFillHoleFix: 1
+    ShouldRemoveFlickerFinalControl: 1
+    EnablePerPlatformAutoSafeGuard: 1

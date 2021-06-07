@@ -95,8 +95,8 @@ namespace UnityCore {
 
                     
                     //Vector3 currentPos = Vector3.Lerp(startingPoint, targetPoint, t);
-                    rb.MovePosition(Vector3.Lerp(startingPoint, targetPoint, t));
-                    //transform.position = Vector3.Lerp(startingPoint, targetPoint, t);
+                    //rb.MovePosition(Vector3.Lerp(startingPoint, targetPoint, t));
+                    transform.position = Vector3.Lerp(startingPoint, targetPoint, t);
                 }
             }
 

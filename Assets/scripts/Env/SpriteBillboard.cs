@@ -4,12 +4,8 @@ using UnityEngine;
 
 public class SpriteBillboard : MonoBehaviour
 {
-    private Camera mainCam;
+    [HideInInspector] public Camera mainCam;
     public bool fullAxis;
-    void Start()
-    {
-        mainCam = Camera.main;
-    }
 
     void Update()
     {

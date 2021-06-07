@@ -6,6 +6,7 @@ public class CameraSmoothCollision : MonoBehaviour
     public float collisionOffset = 0.2f; //To prevent Camera from clipping through Objects
     public LayerMask detectionLayers;
 
+    Vector3 referencePosition;
     Vector3 defaultPos;
     Vector3 directionNormalized;
     Transform parentTransform;
@@ -14,10 +15,10 @@ public class CameraSmoothCollision : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        defaultPos =  transform.localPosition;
-        directionNormalized = defaultPos.normalized;
+        defaultPos = transform.localPosition;
         parentTransform = transform.parent;
-        defaultDistance = Vector3.Distance(defaultPos, Vector3.zero);
+        referencePosition = referenceTransform.position;
+        SettingUpProcedure();
     }
 
     // FixedUpdate for physics calculations
@@ -33,4 +34,16 @@ public class CameraSmoothCollision : MonoBehaviour
 
         transform.localPosition = Vector3.Lerp(transform.localPosition, currentPos, Time.deltaTime * 15f);
     }
+    public void HadleLockOnCollision(Vector3 cameraPos)
+    {
+        defaultPos = cameraPos;
+        referencePosition = referenceTransform.position + Vector3.right;
+        SettingUpProcedure();
+    }
+    public void SettingUpProcedure()
+    {
+        directionNormalized = defaultPos.normalized;
+        defaultDistance = Vector3.Distance(defaultPos, Vector3.zero);
+    }
+    
 }

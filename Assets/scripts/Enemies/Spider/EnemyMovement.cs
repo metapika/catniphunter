@@ -41,18 +41,18 @@ public class EnemyMovement : MonoBehaviour
             
         //     agent.SetDestination(patrolPointsRef.patrolPoints[patrolPointIndex].position);
         // } else {
-        //     if(sight.justSawPlayer) {
-        //         transform.LookAt(new Vector3(sight.player.position.x, transform.position.y, sight.player.position.z));
-        //     }
+            if(sight.justSawPlayer) {
+                transform.LookAt(new Vector3(sight.player.position.x, transform.position.y, sight.player.position.z));
+            }
 
-        //     if(!stats.gettingKnockbacked) {
-        //         if(sight.justSawPlayer && !sight.playerInSightRange)
-        //         {
-        //             ChasePlayer();
-        //         } else {
-        //             agent.isStopped = true;
-        //         }
-        //     }
+            if(!stats.gettingKnockbacked) {
+                if(sight.justSawPlayer && !sight.playerInSightRange)
+                {
+                    ChasePlayer();
+                } else {
+                    if(gameObject.activeSelf) agent.isStopped = true;
+                }
+            }
         // }
     }
 

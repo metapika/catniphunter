@@ -7,6 +7,15 @@
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
+    "com.kink3d.mirrors": {
+      "version": "git+https://github.com/Kink3d/kMirrors",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.render-pipelines.universal": "7.x.x"
+      },
+      "hash": "79b0526e5da06689f12a7f4846b2b568e997be35"
+    },
     "com.kink3d.shading": {
       "version": "https://github.com/Kink3d/kShading.git",
       "depth": 0,

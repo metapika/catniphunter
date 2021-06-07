@@ -8,7 +8,8 @@ using UnityEngine.Rendering.Universal;
 public class CameraController : MonoBehaviour
 {
     #region Fields
-    public Transform targetIndicator;
+    public Transform targetIndicatorPrefab;
+    private SpriteBillboard targetIndicatorRef;
     [SerializeField] private bool lockCursor = true;
     [SerializeField] private bool clampView = true;
     [SerializeField] private bool lockOnTarget = true;
@@ -27,6 +28,7 @@ public class CameraController : MonoBehaviour
 
     private PlayerCombat playerCombat;
     [HideInInspector] public PlayerController controller;
+    private CameraSmoothCollision cameraCollision;
 
     private float mouseX, mouseY;
 
@@ -34,6 +36,7 @@ public class CameraController : MonoBehaviour
 
     #region Unity Functions
     private void Start() {
+        cameraCollision = GetComponent<CameraSmoothCollision>();
         playerCombat = transform.root.GetComponent<PlayerCombat>();
         controller = transform.root.GetComponent<PlayerController>();
 
@@ -83,9 +86,11 @@ public class CameraController : MonoBehaviour
 
                     if(!Physics.Raycast(transform.root.position, dirToTarget, dstToTarget, envoriementMask)) 
                     {
-                        // characterCenter.eulerAngles = Vector3.zero;
-                        // transform.eulerAngles = Vector3.zero;
-                        transform.localPosition = new Vector3(1, transform.localPosition.y, transform.localPosition.z);
+                        Vector3 cameraReset = new Vector3(1, transform.localPosition.y, transform.localPosition.z);
+                        
+                        cameraCollision.HadleLockOnCollision(new Vector3(1f, 0f, -2.5f));
+                        transform.localPosition = cameraReset;
+
                         StartCoroutine(Lerp(vignetteTime, cameraVignette.intensity.value, cameraVignette.intensity.value, lockOnVignette));
                         lockOnTarget = true;
 
@@ -100,10 +105,14 @@ public class CameraController : MonoBehaviour
 
     private void LockOnOff()
     {
+        Vector3 cameraReset = new Vector3(0, transform.localPosition.y, transform.localPosition.z);
         lockOnTarget = false;
-        transform.localPosition = new Vector3(0, transform.localPosition.y, transform.localPosition.z);
-        // transform.localEulerAngles = Vector3.zero;
+
+        cameraCollision.HadleLockOnCollision(new Vector3(0f, 0f, -2.5f));
+        transform.localPosition = cameraReset;
         
+        if(targetIndicatorRef != null) Destroy(targetIndicatorRef.gameObject);
+
         StartCoroutine(Lerp(vignetteTime, cameraVignette.intensity.value, cameraVignette.intensity.value, defaultVignette));
     }
     private void CameraLookAt(Transform target){
@@ -119,8 +128,8 @@ public class CameraController : MonoBehaviour
 
         characterCenter.rotation = lookAt;
 
-
-        targetIndicator.position = target.position + new Vector3(0, 1.5f, 0);
+        if(targetIndicatorRef == null) targetIndicatorRef = Instantiate(targetIndicatorPrefab, target.position + new Vector3(0, 1.5f, 0), Quaternion.identity).GetComponent<SpriteBillboard>();
+        targetIndicatorRef.mainCam = GetComponent<Camera>();
     }
     private IEnumerator Lerp(float time, float value, float startValue, float targetValue)
     {

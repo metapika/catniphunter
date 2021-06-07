@@ -9,6 +9,11 @@ public class PlayerPhysics : MonoBehaviour
     public bool useGravity = true;
     public float gravity = -39.24f;
     public float currentGravity;
+    public Vector3 slidingDirection;
+    public float slopeLimit;
+    public float slidingSpeed = 2f;
+    private Vector3 hitNormal;
+    [HideInInspector] public bool sliding;
     public float pushPower = 5f;
     [SerializeField] private int gravityScale = 1;
     [SerializeField] private float jumpRaycastDistance = 1.2f;
@@ -26,6 +31,7 @@ public class PlayerPhysics : MonoBehaviour
 
     private CharacterController controller;
     private PlayerController movement;
+    private PlayerStats stats;
 
     #endregion
 
@@ -33,11 +39,28 @@ public class PlayerPhysics : MonoBehaviour
     private void Awake() {
         controller = GetComponent<CharacterController>();
         movement = GetComponent<PlayerController>();
+        stats = GetComponent<PlayerStats>();
 
         HandleGravityChange();
     }
     Vector3 connectionWorldPosition;
     private void Update() {
+        if (Vector3.Angle(Vector3.up, hitNormal) > slopeLimit && Vector3.Angle(Vector3.up, hitNormal) < 89f && velocity.y <= 0)
+        {
+            sliding = true;
+ 
+            Vector3 c = Vector3.Cross(Vector3.up, hitNormal);
+            Vector3 u = Vector3.Cross(c, hitNormal);
+            slidingDirection = u * 4f;
+ 
+        }
+        else
+        {
+            sliding = false;
+            slidingDirection = Vector3.zero;
+        }
+        controller.Move(slidingDirection * slidingSpeed * Time.deltaTime);
+
         if(useGravity) {
             if(!IsGrounded())
             {
@@ -88,6 +111,47 @@ public class PlayerPhysics : MonoBehaviour
     }
 
     private void OnControllerColliderHit(ControllerColliderHit hit) {
+        hitNormal = hit.normal;
+
+        if(IsGrounded() && velocity.y < 0) {
+            velocity.y = 0f;
+        }
+
+        if (hit.moveDirection.y < -0.9 && hit.normal.y > 0.41)
+        {
+            if (activePlatform != hit.collider.transform)
+            {
+                activePlatform = hit.collider.transform;
+                UpdateMovingPlatform();
+            }
+        }
+        else
+        {
+            activePlatform = null;
+        }
+
+        Rigidbody body = hit.collider.attachedRigidbody;
+
+        if (body == null || body.isKinematic)
+        {
+            return;
+        }
+
+        if (hit.moveDirection.y < -0.3)
+        {
+            return;
+        }
+
+        if(body.useGravity)
+        {
+            return;
+        }
+
+        Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
+
+        body.velocity = pushDir * pushPower;
+
+
         // if(velocity.y < 0) {
         //     if(hit.gameObject.layer == 8 && velocity.y < 0)
         //     {
@@ -98,49 +162,6 @@ public class PlayerPhysics : MonoBehaviour
         //         velocity.y = 0f;
         //     }
         // }
-        if(IsGrounded() && velocity.y < 0) {
-            velocity.y = 0f;
-        }
-
-
-        if (hit.moveDirection.y < -0.9 && hit.normal.y > 0.41)
-        {
-            if (activePlatform != hit.collider.transform)
-            {
-                if(!hit.collider.transform.CompareTag("Enemy")) {
-                    activePlatform = hit.collider.transform;
-                    UpdateMovingPlatform();
-                }
-            }
-        }
-        else
-        {
-            activePlatform = null;
-        }
-
-        Rigidbody body = hit.collider.attachedRigidbody;
-
-        // no rigidbody
-        if (body == null || body.isKinematic)
-        {
-            return;
-        }
-
-        // We dont want to push objects below us
-        if (hit.moveDirection.y < -0.3)
-        {
-            return;
-        }
-
-        // Calculate push direction from move direction,
-        // we only push objects to the sides never up and down
-        Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
-
-        // If you know how fast your character is trying to move,
-        // then you can also multiply the push velocity by that.
-
-        // Apply the push
-        body.velocity = pushDir * pushPower;
     }
 
     #endregion
@@ -155,7 +176,7 @@ public class PlayerPhysics : MonoBehaviour
     {
         activeGlobalPlatformPoint = transform.position;
         activeLocalPlatformPoint = activePlatform.InverseTransformPoint(transform.position);
-
+        // Support moving platform rotation
         activeGlobalPlatformRotation = transform.rotation;
         activeLocalPlatformRotation = Quaternion.Inverse(activePlatform.rotation) * transform.rotation;
     }

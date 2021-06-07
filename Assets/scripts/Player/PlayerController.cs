@@ -114,7 +114,9 @@ public class PlayerController : MonoBehaviour
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(desiredMoveDirection), 0.2f);
             }
         }
+        
         controller.Move(desiredMoveDirection * calculatedSpeed * Time.deltaTime);
+
 
         if ((movementInput.y != 0 || movementInput.x != 0) && OnSlope()) {
             controller.Move(Vector3.down * controller.height / 2 * slopeForce * Time.deltaTime);

@@ -43106,7 +43106,7 @@ CharacterController:
   serializedVersion: 2
   m_Height: 1.6
   m_Radius: 0.3
-  m_SlopeLimit: 45
+  m_SlopeLimit: 30
   m_StepOffset: 0.1
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
@@ -43127,9 +43127,11 @@ MonoBehaviour:
   useGravity: 1
   gravity: -39.24
   currentGravity: 0
+  slopeLimit: 44
+  slidingSpeed: 2
   pushPower: 5
   gravityScale: 1
-  jumpRaycastDistance: 1.1
+  jumpRaycastDistance: 1
   whatIsGround:
     serializedVersion: 2
     m_Bits: 67841
@@ -43171,7 +43173,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentHealth: 0
-  maxHealth: 200
+  maxHealth: 500
   currentSpeed: 0
   crouchSpeed: 30
   sprintSpeed: 100
