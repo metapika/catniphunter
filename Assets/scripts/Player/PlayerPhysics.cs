@@ -13,7 +13,7 @@ public class PlayerPhysics : MonoBehaviour
     public float slopeLimit;
     public float slidingSpeed = 2f;
     private Vector3 hitNormal;
-    [HideInInspector] public bool sliding;
+    public bool sliding;
     public float pushPower = 5f;
     [SerializeField] private int gravityScale = 1;
     [SerializeField] private float jumpRaycastDistance = 1.2f;
@@ -45,14 +45,13 @@ public class PlayerPhysics : MonoBehaviour
     }
     Vector3 connectionWorldPosition;
     private void Update() {
-        if (Vector3.Angle(Vector3.up, hitNormal) > slopeLimit && Vector3.Angle(Vector3.up, hitNormal) < 89f && velocity.y <= 0)
+        if (Vector3.Angle(Vector3.up, hitNormal) > slopeLimit && Vector3.Angle(Vector3.up, hitNormal) < 89f)
         {
             sliding = true;
  
             Vector3 c = Vector3.Cross(Vector3.up, hitNormal);
             Vector3 u = Vector3.Cross(c, hitNormal);
             slidingDirection = u * 4f;
- 
         }
         else
         {
@@ -142,7 +141,7 @@ public class PlayerPhysics : MonoBehaviour
             return;
         }
 
-        if(body.useGravity)
+        if(body.gameObject.CompareTag("MovingPlatform"))
         {
             return;
         }
@@ -184,7 +183,8 @@ public class PlayerPhysics : MonoBehaviour
         currentGravity = gravity * gravityScale;
     }
     public bool IsGrounded() {
-        return Physics.Raycast(transform.position, Vector3.down, jumpRaycastDistance, whatIsGround);
+        if (Physics.Raycast(transform.position, Vector3.down, jumpRaycastDistance, whatIsGround) && !sliding) return true;
+        else return false;
     }
 
     #endregion

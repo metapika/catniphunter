@@ -8,13 +8,11 @@
       "url": "https://packages.unity.com"
     },
     "com.kink3d.mirrors": {
-      "version": "git+https://github.com/Kink3d/kMirrors",
+      "version": "https://github.com/metapika/kMirrors.git",
       "depth": 0,
       "source": "git",
-      "dependencies": {
-        "com.unity.render-pipelines.universal": "7.x.x"
-      },
-      "hash": "79b0526e5da06689f12a7f4846b2b568e997be35"
+      "dependencies": {},
+      "hash": "226edc4b18c37bd4ae11564535210f0e96ad691f"
     },
     "com.kink3d.shading": {
       "version": "https://github.com/Kink3d/kShading.git",
@@ -145,8 +143,8 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.render-pipelines.core": {
-      "version": "10.3.2",
-      "depth": 2,
+      "version": "10.4.0",
+      "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.ugui": "1.0.0"
@@ -164,19 +162,19 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.render-pipelines.universal": {
-      "version": "10.3.2",
-      "depth": 1,
+      "version": "10.4.0",
+      "depth": 0,
       "source": "registry",
       "dependencies": {
         "com.unity.mathematics": "1.1.0",
-        "com.unity.render-pipelines.core": "10.3.2",
-        "com.unity.shadergraph": "10.3.2"
+        "com.unity.render-pipelines.core": "10.4.0",
+        "com.unity.shadergraph": "10.4.0"
       },
       "url": "https://packages.unity.com"
     },
     "com.unity.searcher": {
       "version": "4.3.1",
-      "depth": 3,
+      "depth": 2,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
@@ -189,11 +187,11 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.shadergraph": {
-      "version": "10.3.2",
-      "depth": 2,
+      "version": "10.4.0",
+      "depth": 1,
       "source": "registry",
       "dependencies": {
-        "com.unity.render-pipelines.core": "10.3.2",
+        "com.unity.render-pipelines.core": "10.4.0",
         "com.unity.searcher": "4.3.1"
       },
       "url": "https://packages.unity.com"
