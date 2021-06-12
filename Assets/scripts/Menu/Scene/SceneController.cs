@@ -141,7 +141,7 @@ namespace UnityCore {
 
             private string SceneTypeToString(SceneType _scene) {
                 switch (_scene) {
-                    case SceneType.TestZone: return "TestZone";
+                    case SceneType.TutorialLevel: return "TutorialLevel";
                     case SceneType.Menus: return "Menus";
                     case SceneType.Hub: return "Hub";
                     default:
@@ -152,7 +152,7 @@ namespace UnityCore {
 
             private SceneType StringToSceneType(string _scene) {
                 switch (_scene) {
-                    case "TestZone": return SceneType.TestZone;
+                    case "TutorialLevel": return SceneType.TutorialLevel;
                     case "Menus": return SceneType.Menus;
                     case "Hub": return SceneType.Hub;
                     default:

@@ -21,10 +21,11 @@ public class PlayerStats : MonoBehaviour
     private bool canTakeDamage = true;
     [Space]
 
-    [Header("Spectacular Death")]
+    [Header("Death and such")]
     public Slider healthBar;
     public Image blackDeathScreen;
     public float deathFadeInTime = 1f;
+    public FadeFromBlack fadeFromBlack;
     public TextMeshProUGUI healthText;
     public GameObject hitTextPopUp;
     public Image hitIndicator;
@@ -135,6 +136,7 @@ public class PlayerStats : MonoBehaviour
     #region Custom Functions
     public void SoftRespawn()
     {
+        fadeFromBlack.FadeFromColor(Color.white);
         transform.position = respawnPointPosition;
     }
     public void Die(string animationTrigger) {

@@ -184,7 +184,7 @@ public class PlayerCombat : MonoBehaviour
 
         LockOnIndexing();
 
-        if(Input.GetKeyDown(KeyCode.R) && targetNotBehindCover && targets.Count > 0)
+        if(Input.GetKeyDown(KeyCode.R) && targetNotBehindCover && targets.Count > 0 || Input.GetKeyDown(KeyCode.R) && targets.Count > 0 && camControl.CameraToggleState())
         {
             camControl.ToggleCameraLockOn();
         }

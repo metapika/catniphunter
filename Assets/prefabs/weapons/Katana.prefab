@@ -304,7 +304,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.5377358, g: 0.5377358, b: 0.5377358, a: 1}
+      maxColor: {r: 0.4117647, g: 0.18039216, b: 0.9411765, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -366,7 +366,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.15
+      scalar: 0.13
       minScalar: 0.05
       maxCurve:
         serializedVersion: 2
@@ -4076,7 +4076,7 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     minVertexDistance: 0.01
-    textureMode: 0
+    textureMode: 1
     ribbonCount: 1
     shadowBias: 0.5
     worldSpace: 1
@@ -4853,7 +4853,7 @@ ParticleSystemRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 0}
-  - {fileID: 2100000, guid: 9080c5de2c8730984b1e11a07b43499e, type: 2}
+  - {fileID: 2100000, guid: dfac1de16aacea942bfa5e85e72593d6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5007,7 +5007,7 @@ Transform:
   m_GameObject: {fileID: 4995140533981461001}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1.1264939}
+  m_LocalScale: {x: 1.6211284, y: 1.7515298, z: 1.6984137}
   m_Children:
   - {fileID: 4995140534209748241}
   - {fileID: 4995140533518134396}
@@ -5045,6 +5045,8 @@ MonoBehaviour:
   - 10
   - 10
   canAttack: 1
+  timeStopDuration: 0.15
+  minKnifeKillDistance: 0.3
   trail: {fileID: 4995140534849810413}
   hitParticles: {fileID: 4438507562965381952, guid: 3600ae06b5f2ebb8a98b48bc26d7ebf7, type: 3}
   sword1: {fileID: 0}

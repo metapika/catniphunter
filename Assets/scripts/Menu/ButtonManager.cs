@@ -21,6 +21,9 @@ namespace UnityCore {
             public void ModeSelect() {
                 PageController.TurnPageOff(PageType.MainMenu, PageType.ModeSelect);
             }
+            public void MissionSelect() {
+                PageController.TurnPageOff(PageType.ModeSelect, PageType.MissionSelect);
+            }
             public void SaveSelect() {
                 PageController.TurnPageOff(PageType.ModeSelect, PageType.SaveSelect);
             }
@@ -28,20 +31,7 @@ namespace UnityCore {
                 menuOnly.SetActive(false);
                 PageController.TurnPageOff(PageType.MainMenu, PageType.Customize);
             }
-            public void LoadIntoGame() {
-                PageController.TurnPageOff(PageType.SaveSelect);
-                SceneController.Load(SceneType.TestZone, (_scene) => {
-                                     Debug.Log("Scene [" + _scene + "] loaded from the button manager!" );
-                                    }, false, PageType.Loading);
-            }
-            public void LoadIntoHub() {
-                PageController.TurnPageOff(PageType.ModeSelect);
-                PageController.TurnPageOff(PageType.EndGameScreen);
-                Time.timeScale = 1f;
-                SceneController.Load(SceneType.Hub, (_scene) => {
-                                     Debug.Log("Scene [" + _scene + "] loaded from the button manager!" );
-                                    }, false, PageType.Loading);
-            }
+
             public void Restart() {
                 PauseMenu.EnableComponents();
                 PageController.TurnPageOff(PageType.DeathScreen);
@@ -61,6 +51,14 @@ namespace UnityCore {
                                      Debug.Log("Scene [" + _scene + "] loaded from the button manager!" );
                                     }, false, PageType.Loading);
             }
+            public void LoadIntoHub() {
+                PageController.TurnPageOff(PageType.ModeSelect);
+                PageController.TurnPageOff(PageType.EndGameScreen);
+                Time.timeScale = 1f;
+                SceneController.Load(SceneType.Hub, (_scene) => {
+                                     Debug.Log("Scene [" + _scene + "] loaded from the button manager!" );
+                                    }, false, PageType.Loading);
+            }
             public void Save()
             {
                 if(SceneManager.GetActiveScene().name != "Menu")
@@ -73,6 +71,13 @@ namespace UnityCore {
             }
             public void Quit() {
                 Application.Quit();
+            }
+            // ------------------------Missions-----------------------------
+            public void TutorialMission() {
+                PageController.TurnPageOff(PageType.MissionSelect);
+                SceneController.Load(SceneType.TutorialLevel, (_scene) => {
+                                     Debug.Log("Scene [" + _scene + "] loaded from the button manager!" );
+                                    }, false, PageType.Loading);
             }
         }
     }

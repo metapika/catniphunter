@@ -12,7 +12,9 @@ public class PlayerPhysics : MonoBehaviour
     public Vector3 slidingDirection;
     public float slopeLimit;
     public float slidingSpeed = 2f;
+    public LayerMask ignoreSlidingLayers;
     private Vector3 hitNormal;
+    private GameObject hitObject;
     public bool sliding;
     public float pushPower = 5f;
     [SerializeField] private int gravityScale = 1;
@@ -45,33 +47,15 @@ public class PlayerPhysics : MonoBehaviour
     }
     Vector3 connectionWorldPosition;
     private void Update() {
-        if (Vector3.Angle(Vector3.up, hitNormal) > slopeLimit && Vector3.Angle(Vector3.up, hitNormal) < 89f)
-        {
-            sliding = true;
- 
-            Vector3 c = Vector3.Cross(Vector3.up, hitNormal);
-            Vector3 u = Vector3.Cross(c, hitNormal);
-            slidingDirection = u * 4f;
-        }
-        else
-        {
-            sliding = false;
-            slidingDirection = Vector3.zero;
-        }
-        controller.Move(slidingDirection * slidingSpeed * Time.deltaTime);
+        HandleSlidingOffSlopes();
 
-        if(useGravity) {
-            if(!IsGrounded())
-            {
-                velocity.y += gravity * Time.deltaTime;
-            }
-            controller.Move(velocity * Time.deltaTime);
-        }
+        HandleGravity();
+
+        controllerVelocity.y = controller.velocity.y;
 
         if (impact.magnitude > 0.2) controller.Move(impact * Time.deltaTime);
             impact = Vector3.Lerp(impact, Vector3.zero, 5 * Time.deltaTime);
 
-        controllerVelocity.y = controller.velocity.y;
 
         if (activePlatform != null)
         {
@@ -108,8 +92,41 @@ public class PlayerPhysics : MonoBehaviour
             activePlatform = null;
         }
     }
+    private void HandleSlidingOffSlopes()
+    {
+        if(hitObject == null) return;
+
+        if(hitObject.layer == ignoreSlidingLayers) return;
+
+        if (Vector3.Angle(Vector3.up, hitNormal) > slopeLimit && Vector3.Angle(Vector3.up, hitNormal) < 89f)
+        {
+            sliding = true;
+
+            Vector3 c = Vector3.Cross(Vector3.up, hitNormal);
+            Vector3 u = Vector3.Cross(c, hitNormal);
+            slidingDirection = u * 4f;
+        }
+        else
+        {
+            sliding = false;
+            slidingDirection = Vector3.zero;
+        }
+
+        controller.Move(slidingDirection * slidingSpeed * Time.deltaTime);
+    }
+    private void HandleGravity()
+    {
+        if(useGravity) {
+            if(!IsGrounded())
+            {
+                velocity.y += gravity * Time.deltaTime;
+            }
+            controller.Move(velocity * Time.deltaTime);
+        }
+    }
 
     private void OnControllerColliderHit(ControllerColliderHit hit) {
+        hitObject = hit.gameObject;
         hitNormal = hit.normal;
 
         if(IsGrounded() && velocity.y < 0) {
@@ -118,6 +135,8 @@ public class PlayerPhysics : MonoBehaviour
 
         if (hit.moveDirection.y < -0.9 && hit.normal.y > 0.41)
         {
+            if(hit.collider.CompareTag("Enemy")) return;
+
             if (activePlatform != hit.collider.transform)
             {
                 activePlatform = hit.collider.transform;

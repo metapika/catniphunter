@@ -6,13 +6,15 @@ using TMPro;
 public class DialogueManager : MonoBehaviour
 {
     public TextMeshProUGUI dialogueText;
-    private Queue<string> sentences;
+    [HideInInspector] public Queue<string> sentences;
     
     void Start() {
         sentences = new Queue<string>();
     }
 
     public void StartDialogue(Dialogue dialogue) {
+        Time.timeScale = 0f;
+
         dialogueText.transform.parent.parent.gameObject.SetActive(true);
         dialogueText.transform.parent.parent.GetComponent<Animator>().SetTrigger("start");
         sentences.Clear();
@@ -38,6 +40,9 @@ public class DialogueManager : MonoBehaviour
 
     void EndDialogue()
     {
+        Time.timeScale = 1f;
+        if (!dialogueText.transform.parent.parent.gameObject.activeSelf) return;
+
         dialogueText.transform.parent.parent.GetComponent<Animator>().SetTrigger("end");
     }
 }

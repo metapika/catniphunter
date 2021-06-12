@@ -7,7 +7,7 @@ namespace UnityCore {
             None,
             Menus,
             Hub,
-            TestZone
+            TutorialLevel
         }
     }
 }

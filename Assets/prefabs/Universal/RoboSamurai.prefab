@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 141022277}
   - component: {fileID: 141022278}
-  m_Layer: 9
+  m_Layer: 21
   m_Name: triggerCard
-  m_TagString: Player
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -117,7 +117,7 @@ GameObject:
   - component: {fileID: 74270815700939204}
   - component: {fileID: 74270815700939209}
   - component: {fileID: 74270815700939205}
-  m_Layer: 9
+  m_Layer: 15
   m_Name: Shield
   m_TagString: Shield
   m_Icon: {fileID: 0}
@@ -150,8 +150,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 0
   serializedVersion: 2
-  m_Size: {x: 0.21277755, y: 0.012250383, z: 0.01916667}
-  m_Center: {x: -0.08395267, y: 0.000039555776, z: -9.581005e-12}
+  m_Size: {x: 0.37595338, y: 0.027643556, z: 0.02310782}
+  m_Center: {x: -0.1655401, y: 0.00003955533, z: -0.001970566}
 --- !u!114 &74270815700939209
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -42676,6 +42676,7 @@ GameObject:
   - component: {fileID: 6659256268046417031}
   - component: {fileID: 6659256268046417027}
   - component: {fileID: 6659256268046417029}
+  - component: {fileID: 1054562898}
   m_Layer: 9
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -42792,7 +42793,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 590fc9761baed7dc487e2c30906d87fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetIndicator: {fileID: 0}
+  targetIndicatorPrefab: {fileID: 2511175754576743103, guid: 881b726ae56c183e2833ee6863d0fb4c, type: 3}
   lockCursor: 1
   clampView: 1
   lockOnTarget: 0
@@ -42806,6 +42807,23 @@ MonoBehaviour:
     m_Bits: 256
   postProcessVolume: {fileID: 0}
   controller: {fileID: 0}
+--- !u!114 &1054562898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6659256268046417028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 585368a62c4cf879dbfe73beb8e0a13d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  referenceTransform: {fileID: 8342609393849208473}
+  collisionOffset: 0.3
+  detectionLayers:
+    serializedVersion: 2
+    m_Bits: 257
 --- !u!1 &7135825142367292635
 GameObject:
   m_ObjectHideFlags: 0
@@ -43107,7 +43125,7 @@ CharacterController:
   m_Height: 1.6
   m_Radius: 0.3
   m_SlopeLimit: 30
-  m_StepOffset: 0.1
+  m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
@@ -43127,11 +43145,16 @@ MonoBehaviour:
   useGravity: 1
   gravity: -39.24
   currentGravity: 0
-  slopeLimit: 44
+  slidingDirection: {x: 0, y: 0, z: 0}
+  slopeLimit: 30
   slidingSpeed: 2
+  ignoreSlidingLayers:
+    serializedVersion: 2
+    m_Bits: 65536
+  sliding: 0
   pushPower: 5
   gravityScale: 1
-  jumpRaycastDistance: 1
+  jumpRaycastDistance: 1.2
   whatIsGround:
     serializedVersion: 2
     m_Bits: 67841
@@ -43153,7 +43176,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   slopeForce: 13
-  slopeForceRayLength: 1.3
+  slopeForceRayLength: 1
   originalCenter: {x: 0, y: 0, z: 0}
   moveDir: {x: 0, y: 0, z: 0}
   controller: {fileID: 0}
@@ -43495,7 +43518,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4995140533981461001, guid: 07e71974a807bec1cb405cd3e379359b, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4995140533981461044, guid: 07e71974a807bec1cb405cd3e379359b, type: 3}
       propertyPath: timeStopDuration

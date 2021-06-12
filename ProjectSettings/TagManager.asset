@@ -42,7 +42,7 @@ TagManager:
   - Bullet
   - ParticleSystem
   - Shield
-  - Wall
+  - Non-slidable
   - WeaponPad
   - Weapon
   - BulletDetection

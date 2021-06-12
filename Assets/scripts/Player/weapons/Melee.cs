@@ -36,6 +36,8 @@ public class Melee : MonoBehaviour
         }
     }
     private void Update() {
+        if(Time.timeScale <= 0) return;
+        
         if(canAttack && transform.parent != null) {
             if(Input.GetButtonDown("Attack") && transform.parent.CompareTag("WeaponHolder")) {
                 EquipSword();

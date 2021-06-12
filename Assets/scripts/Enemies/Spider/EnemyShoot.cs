@@ -56,10 +56,16 @@ public class EnemyShoot : MonoBehaviour
         }
     }
     private Vector3 PredictPosition(Transform target){
-        Vector3 pos = target.position;
-        Vector3 dir = target.GetComponent<PlayerPhysics>().controllerVelocity;
-        
-        float dist = (pos-transform.position).magnitude;
+        Vector3 pos = Vector3.zero;
+        Vector3 dir = Vector3.zero;
+        float dist = 0;
+
+        if(target != null && target.GetComponent<PlayerPhysics>())
+        {
+            pos = target.position;
+            dir = target.GetComponent<PlayerPhysics>().controllerVelocity;
+            dist = (pos-transform.position).magnitude;
+        }
 
         return pos + (dist/blasterProjectile.GetComponent<BulletBase>().bulletSpeed)*dir;
     }

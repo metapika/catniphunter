@@ -15,7 +15,8 @@ namespace UnityCore {
             Customize,
             DeathScreen,
             MoneyNumber,
-            EndGameScreen
+            EndGameScreen,
+            MissionSelect
         }
     }
 }

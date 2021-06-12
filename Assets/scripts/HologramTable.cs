@@ -76,7 +76,7 @@ public class HologramTable : MonoBehaviour, IInteractable
     public void LoadIntoTestZone() {
         if(pageController == null || sceneControler == null) return;
 
-        sceneControler.Load(SceneType.TestZone, (_scene) => {
+        sceneControler.Load(SceneType.TutorialLevel, (_scene) => {
                                 Debug.Log("Scene [" + _scene + "] loaded from the hologram map!" );
                             }, false, PageType.Loading);
     }

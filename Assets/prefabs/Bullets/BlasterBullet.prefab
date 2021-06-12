@@ -101,6 +101,16 @@ MonoBehaviour:
   bulletRemoveTime: 50
   bulletDamage: 5
   hitParticles: {fileID: 721811861951029676, guid: 780ea90b0d770284d971fb32abf0a9fe, type: 3}
+  enemy: {fileID: 0}
+  playerMask:
+    serializedVersion: 2
+    m_Bits: 512
+  shieldMask:
+    serializedVersion: 2
+    m_Bits: 32768
+  envoriementMask:
+    serializedVersion: 2
+    m_Bits: 65792
   prevPos: {x: 0, y: 0, z: 0}
 --- !u!54 &-11699581989796820
 Rigidbody:

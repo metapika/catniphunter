@@ -28,19 +28,39 @@ public class BulletBase: MonoBehaviour
         
         for (int i = 0; i < hits.Length; i++)
         {
-
-            if(!hits[i].collider.gameObject.CompareTag("Player") && !hits[i].collider.gameObject.CompareTag("Enemy")) {
-                if(hits[i].collider.gameObject.CompareTag("Shield"))
-                {
-                    hits[i].transform.GetComponent<Shield>().BlockDamage(bulletDamage);
-                    Destroy(gameObject);
-                }
-            } else if(hits[i].collider.gameObject.CompareTag("Player")) 
+            if(hits[i].collider.gameObject.CompareTag("Player"))
             {
+                Debug.Log(hits[i].collider.name);
                 hits[i].transform.GetComponent<PlayerStats>().ParryDecision(bulletDamage, enemy);
                 Destroy(gameObject);
                 return;
             }
+            else if(hits[i].collider.gameObject.CompareTag("Shield"))
+            {
+                Debug.Log(hits[i].collider.name);
+                hits[i].transform.GetComponent<Shield>().BlockDamage(bulletDamage);
+                Destroy(gameObject);
+                return;
+            }
+            else if(hits[i].collider.gameObject.CompareTag("Enemy") || hits[i].collider.gameObject.CompareTag("Bullet"))
+            {
+                return;
+            } else {
+                Debug.Log(hits[i].collider.name);
+                Destroy(gameObject);
+            }
+            // if(!hits[i].collider.gameObject.CompareTag("Player") && !hits[i].collider.gameObject.CompareTag("Enemy")) {
+            //     if(hits[i].collider.gameObject.CompareTag("Shield"))
+            //     {
+            //         hits[i].transform.GetComponent<Shield>().BlockDamage(bulletDamage);
+            //         Destroy(gameObject);
+            //     }
+            // } else if(hits[i].collider.gameObject.CompareTag("Player")) 
+            // {
+            //     hits[i].transform.GetComponent<PlayerStats>().ParryDecision(bulletDamage, enemy);
+            //     Destroy(gameObject);
+            //     return;
+            // }
         }
         //Instantiate(hitParticles, transform.position, Quaternion.identity);
     }

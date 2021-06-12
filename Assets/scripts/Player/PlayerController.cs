@@ -24,6 +24,7 @@ public class PlayerController : MonoBehaviour
     private PlayerPhysics pphysics;
     private PlayerCombat combat;
     private Animator anim;
+    private float stepOffset;
     private static readonly int hashSpeedPercentage = Animator.StringToHash("SpeedPercentage");
     public MoneyManager money;
     
@@ -39,6 +40,7 @@ public class PlayerController : MonoBehaviour
 
         originalHeight = controller.height;
         originalCenter = controller.center;
+        stepOffset = controller.stepOffset;
 
         money = MoneyManager.singleton;
     }
@@ -104,6 +106,11 @@ public class PlayerController : MonoBehaviour
                     anim.SetBool("crouching", true);
                 }
             }
+        }
+        if(pphysics.IsGrounded()) {
+            controller.stepOffset = stepOffset;
+        } else if(!pphysics.sliding) {
+            controller.stepOffset = 0;
         }
 
         float calculatedSpeed = 0;
