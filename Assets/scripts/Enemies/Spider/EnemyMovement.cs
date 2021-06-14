@@ -75,8 +75,6 @@ public class EnemyMovement : MonoBehaviour
     }
     private void ChasePlayer()
     {
-        Debug.Log("I'm in");
-        
         Vector3 movePos = Vector3.Normalize(sight.player.position - transform.position);
 
         if(sight.playerInSightRange) {

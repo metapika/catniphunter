@@ -32,7 +32,7 @@ public class PlayerPhysics : MonoBehaviour
     Quaternion activeLocalPlatformRotation;
 
     private CharacterController controller;
-    private PlayerController movement;
+    [HideInInspector] public PlayerController movement;
     private PlayerStats stats;
 
     #endregion
@@ -55,7 +55,6 @@ public class PlayerPhysics : MonoBehaviour
 
         if (impact.magnitude > 0.2) controller.Move(impact * Time.deltaTime);
             impact = Vector3.Lerp(impact, Vector3.zero, 5 * Time.deltaTime);
-
 
         if (activePlatform != null)
         {

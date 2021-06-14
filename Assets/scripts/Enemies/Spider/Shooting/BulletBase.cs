@@ -49,18 +49,6 @@ public class BulletBase: MonoBehaviour
                 Debug.Log(hits[i].collider.name);
                 Destroy(gameObject);
             }
-            // if(!hits[i].collider.gameObject.CompareTag("Player") && !hits[i].collider.gameObject.CompareTag("Enemy")) {
-            //     if(hits[i].collider.gameObject.CompareTag("Shield"))
-            //     {
-            //         hits[i].transform.GetComponent<Shield>().BlockDamage(bulletDamage);
-            //         Destroy(gameObject);
-            //     }
-            // } else if(hits[i].collider.gameObject.CompareTag("Player")) 
-            // {
-            //     hits[i].transform.GetComponent<PlayerStats>().ParryDecision(bulletDamage, enemy);
-            //     Destroy(gameObject);
-            //     return;
-            // }
         }
         //Instantiate(hitParticles, transform.position, Quaternion.identity);
     }

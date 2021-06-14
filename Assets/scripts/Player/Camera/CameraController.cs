@@ -122,7 +122,7 @@ public class CameraController : MonoBehaviour
             return;
         }
 
-        Vector3 direction = playerCombat.lockOnTarget.position - transform.position;
+        Vector3 direction = target.position - transform.position;
         Quaternion targetRotation = Quaternion.LookRotation(direction);
         Quaternion lookAt = Quaternion.RotateTowards(transform.rotation, targetRotation, Time.deltaTime * playerCombat.lockOnSmoothness);
 

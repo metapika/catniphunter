@@ -40,7 +40,7 @@ public class PlayerCombat : MonoBehaviour
     public int lockIndex;
     public float lockOnSmoothness = 30f;
     public LayerMask maskForCoverCheck;
-    private bool targetNotBehindCover;
+    public bool targetNotBehindCover;
 
     private CharacterController controller;
     private PlayerPhysics pphysics;
@@ -231,7 +231,7 @@ public class PlayerCombat : MonoBehaviour
 
         movement.canRotate = false;
 
-        if (targets.Count > 0) {  
+        if (targets.Count > 0 && lockOnTarget != null) {  
             nearestTarget = targets[NearestTargetToCenter()];
                 
             RaycastHit hit;
@@ -385,8 +385,10 @@ public class PlayerCombat : MonoBehaviour
         
         if(targets.Count > 0)
         {
-            if(camControl.CameraToggleState()) MoveTowardsTarget(lockOnTarget);
-            else MoveTowardsTarget(nearestTarget);
+            if(targetNotBehindCover) {
+                if(camControl.CameraToggleState()) MoveTowardsTarget(lockOnTarget);
+                else MoveTowardsTarget(nearestTarget);
+            }
         }
 
         currentWeapon.GetComponent<Melee>().canAttack = false;

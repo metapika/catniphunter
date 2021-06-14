@@ -15,7 +15,7 @@ public class PlayerController : MonoBehaviour
     [HideInInspector] public CharacterController controller;
     public bool canRotate = true;
     public bool canMove = true;
-    private bool crouching = false;
+    public bool crouching = false;
     private float speedSmoothTime = 0.1f;
     private bool jumpWasPressed;
     private bool canJumpNoGrounded;
@@ -82,28 +82,12 @@ public class PlayerController : MonoBehaviour
             if(Input.GetButtonDown("Crouch")) {
                 if(crouching)
                 {
-                    Ray crouchRay = new Ray(transform.position + Vector3.up * controller.radius * 0.5f, Vector3.up);
-                    float crouchRayLength = originalHeight - controller.radius * 0.5f;
-                    if (Physics.SphereCast(crouchRay, controller.radius * 0.5f, crouchRayLength, Physics.AllLayers, QueryTriggerInteraction.Ignore))
-                    {
-                        crouching = true;
-                        return;
-                    }
-                    controller.height = originalHeight;
-                    controller.center = originalCenter;
+                    UnCrouch();
 
-                    crouching = false;
-
-                    stats.ChangeSpeed(stats.sprintSpeed);
-                    anim.SetBool("crouching", false);
                 }
                 else
                 {
-                    crouching = true;
-                    controller.height = 1.3f;
-                    controller.center = new Vector3(0f, -0.15f, 0f);
-                    stats.ChangeSpeed(stats.crouchSpeed);
-                    anim.SetBool("crouching", true);
+                    Crouch();
                 }
             }
         }
@@ -131,6 +115,31 @@ public class PlayerController : MonoBehaviour
 
         anim.SetFloat(hashSpeedPercentage, 1f * movementInput.magnitude, speedSmoothTime, Time.deltaTime);
     }
+    public void UnCrouch()
+    {
+        Ray crouchRay = new Ray(transform.position + Vector3.up * controller.radius * 0.5f, Vector3.up);
+        float crouchRayLength = originalHeight - controller.radius * 0.5f;
+        if (Physics.SphereCast(crouchRay, controller.radius * 0.5f, crouchRayLength, Physics.AllLayers, QueryTriggerInteraction.Ignore))
+        {
+            crouching = true;
+            return;
+        }
+        controller.height = originalHeight;
+        controller.center = originalCenter;
+
+        crouching = false;
+
+        stats.ChangeSpeed(stats.sprintSpeed);
+        anim.SetBool("crouching", false);
+    }
+    private void Crouch()
+    {
+        crouching = true;
+        controller.height = 1.3f;
+        controller.center = new Vector3(0f, -0.15f, 0f);
+        stats.ChangeSpeed(stats.crouchSpeed);
+        anim.SetBool("crouching", true);
+    }
     private bool OnSlope()
     {
         RaycastHit hit;
@@ -151,6 +160,8 @@ public class PlayerController : MonoBehaviour
         
         if(Input.GetKeyDown(KeyCode.Space)) 
         {
+            if(crouching) {UnCrouch(); return;}
+
             jumpWasPressed = true;
             StartCoroutine(RememberJumpTime());
             if(canJumpNoGrounded)

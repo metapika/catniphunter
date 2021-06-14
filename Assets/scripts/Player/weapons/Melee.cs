@@ -19,6 +19,7 @@ public class Melee : MonoBehaviour
     [Header("Only check this if the weapon is double swords")]    
     public Transform sword1;
     public Transform sword2;
+    private PlayerPhysics pphysics;
 
     #endregion
 
@@ -40,6 +41,8 @@ public class Melee : MonoBehaviour
         
         if(canAttack && transform.parent != null) {
             if(Input.GetButtonDown("Attack") && transform.parent.CompareTag("WeaponHolder")) {
+                // && pphysics.IsGrounded()
+                pphysics.movement.UnCrouch();
                 EquipSword();
 
                 Attack();
@@ -99,6 +102,7 @@ public class Melee : MonoBehaviour
     }
     public void InitializeEquip() {
         combat = transform.root.GetComponent<PlayerCombat>();
+        pphysics = transform.root.GetComponent<PlayerPhysics>();
         anim = transform.root.GetComponent<Animator>();
     }
 
