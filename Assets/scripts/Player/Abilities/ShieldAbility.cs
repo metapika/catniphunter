@@ -26,13 +26,28 @@ public class ShieldAbility : MonoBehaviour
     }
 
     private void Update() {
-        if(Input.GetButton("Shield") && pphysics.IsGrounded())
+
+        if(combat.currentWeapon)
         {
-            Shield();
-        } else if(Input.GetButtonUp("Shield"))
-        {
-            DisableShield();
+            if(Input.GetButton("Shield") && pphysics.IsGrounded() && combat.currentWeapon.canAttack)
+            {
+                Shield();
+            }
+            if(Input.GetButtonUp("Shield") || !combat.currentWeapon.canAttack)
+            {
+                DisableShield();
+            }
+        } 
+        else {
+            if(Input.GetButton("Shield") && pphysics.IsGrounded())
+            {
+                Shield();
+            } else if(Input.GetButtonUp("Shield"))
+            {
+                DisableShield();
+            }
         }
+
     }
     private void Shield() {
         playerAnim.SetBool("blocking", true);

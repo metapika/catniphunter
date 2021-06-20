@@ -16,4 +16,6 @@ MonoBehaviour:
   damage: 200
   attackSpeed: 1
   multipleAnimations: 0
+  stealthWeapon: 1
   animationTrigger: stealthKnife
+  prefabPath: Assets/prefabs/weapons/StealthKnife.prefab

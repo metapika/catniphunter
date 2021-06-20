@@ -119,7 +119,7 @@ public class PlayerController : MonoBehaviour
     {
         Ray crouchRay = new Ray(transform.position + Vector3.up * controller.radius * 0.5f, Vector3.up);
         float crouchRayLength = originalHeight - controller.radius * 0.5f;
-        if (Physics.SphereCast(crouchRay, controller.radius * 0.5f, crouchRayLength, Physics.AllLayers, QueryTriggerInteraction.Ignore))
+        if (CheckIfCanUncrouch())
         {
             crouching = true;
             return;
@@ -131,6 +131,12 @@ public class PlayerController : MonoBehaviour
 
         stats.ChangeSpeed(stats.sprintSpeed);
         anim.SetBool("crouching", false);
+    }
+    public bool CheckIfCanUncrouch()
+    {
+        Ray crouchRay = new Ray(transform.position + Vector3.up * controller.radius * 0.5f, Vector3.up);
+        float crouchRayLength = originalHeight - controller.radius * 0.5f;
+        return Physics.SphereCast(crouchRay, controller.radius * 0.5f, crouchRayLength, Physics.AllLayers, QueryTriggerInteraction.Ignore);
     }
     private void Crouch()
     {

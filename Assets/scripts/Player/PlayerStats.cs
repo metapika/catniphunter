@@ -25,7 +25,6 @@ public class PlayerStats : MonoBehaviour
     public Slider healthBar;
     public Image blackDeathScreen;
     public float deathFadeInTime = 1f;
-    public FadeFromBlack fadeFromBlack;
     public TextMeshProUGUI healthText;
     public GameObject hitTextPopUp;
     public Image hitIndicator;
@@ -41,18 +40,10 @@ public class PlayerStats : MonoBehaviour
     [HideInInspector] public PageController PageController;
     private ButtonManager buttonManager;
 
-    [Space]
-
-    [Header("Respawning")]
-    public Vector3 respawnPointPosition;
-
     #endregion
 
     #region Unity Functions
     private void Start() {
-        respawnPointPosition = transform.position;
-    }
-    private void Awake() {
         combat = GetComponent<PlayerCombat>();
         currentHealth = maxHealth;
 
@@ -78,13 +69,6 @@ public class PlayerStats : MonoBehaviour
             }
         }
     }
-
-    private void OnTriggerEnter(Collider other) {
-        if(other.CompareTag("Respawn"))
-        {
-            respawnPointPosition = other.transform.position;
-        }
-    }
     
     #endregion
 
@@ -98,7 +82,7 @@ public class PlayerStats : MonoBehaviour
             currentHealth += amount;
         }
 
-        ShowFloatingText(amount.ToString());
+        //ShowFloatingText(amount.ToString());
         UpdateUI();
     }
     #endregion
@@ -134,11 +118,6 @@ public class PlayerStats : MonoBehaviour
     #endregion
 
     #region Custom Functions
-    public void SoftRespawn()
-    {
-        fadeFromBlack.FadeFromColor(Color.white);
-        transform.position = respawnPointPosition;
-    }
     public void Die(string animationTrigger) {
         dead = true;
         LightsGoOut();
@@ -210,7 +189,7 @@ public class PlayerStats : MonoBehaviour
             
             case 1:
                 blackDeathScreen.color = new Color(blackDeathScreen.color.r, blackDeathScreen.color.b, blackDeathScreen.color.g, targetValue);
-                if(buttonManager) buttonManager.Restart();
+                if(buttonManager) buttonManager.RestartFromCheckpoint();
                 break;
         }
     }

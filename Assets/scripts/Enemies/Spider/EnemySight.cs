@@ -14,6 +14,7 @@ public class EnemySight : MonoBehaviour
     public bool justSawPlayer;
     public LayerMask playerMask;
     public LayerMask envoriementMask;
+    public LayerMask enemyMask;
     public Transform player;
     private void Start() {
         StartCoroutine("FindTargetsWithDelay", .2f);
@@ -33,6 +34,7 @@ public class EnemySight : MonoBehaviour
                     if(!Physics.Raycast(transform.position, dirToTarget, dstToTarget, envoriementMask)) {
                         justSawPlayer = true;
                         player = target;
+                        AlertOthers();
                         playerInSightRange = true;
                         if(dstToTarget <= attackRange)
                             playerInAttackRange = true;
@@ -55,6 +57,19 @@ public class EnemySight : MonoBehaviour
         while(true) {
             yield return new WaitForSeconds(delay);
             FindVisibleTargets();
+        }
+    }
+    public void AlertOthers()
+    {
+        Collider[] foundEnemies = Physics.OverlapSphere(transform.position, 35, enemyMask);
+        foreach (Collider enemy in foundEnemies)
+        {
+            EnemySight othersSight = enemy.GetComponent<EnemySight>();
+
+            if(othersSight) {
+                othersSight.player = player;
+                othersSight.justSawPlayer = true;
+            }
         }
     }
     public Vector3 DirFromAngle(float angleInDegrees, bool angleIsGlobal)

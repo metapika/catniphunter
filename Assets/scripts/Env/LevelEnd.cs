@@ -10,6 +10,7 @@ public class LevelEnd : MonoBehaviour
             PlayerStats player = other.GetComponent<PlayerStats>();
 
             if(player.PageController) {
+                PageController.instance.GetComponent<PauseMenu>().gameEnded = true;
                 Time.timeScale = 0f;
                 Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;

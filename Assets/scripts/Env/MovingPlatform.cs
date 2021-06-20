@@ -7,7 +7,7 @@ namespace UnityCore {
     namespace Environment {
 
         public class MovingPlatform : MonoBehaviour {
-            
+            public bool allEnemiesDefeated;
             [SerializeField] Transform waypointsParent;
             [SerializeField] float travelTimeBetweenPoints = 5f;
             [SerializeField] float endPointStallTime = 3f;

@@ -9,6 +9,8 @@ public class PauseMenu : MonoBehaviour
 {
     private GameObject Player;
     private SceneController SceneController;
+    public static PauseMenu instance;
+    public bool gameEnded;
     
     private PageController PageController;
 
@@ -17,16 +19,19 @@ public class PauseMenu : MonoBehaviour
         PageController = PageController.instance;
         SceneController = SceneController.instance;
     }
+    private void Awake() {
+        gameEnded = false;
+    }
 
     void Update()
     {
-        if(SceneController.currentSceneName != "Menu") {
+        if(SceneController.currentSceneName != "Menus") {
             if(Player == null) {
                 if(SceneController.currentSceneName != "Hub") Player = GameObject.Find("RoboSamurai");
                 else Player = GameObject.Find("RoboSamurai_Hub");
             }
 
-            if(Input.GetButtonDown("Pause"))
+            if(Input.GetButtonDown("Pause") && !gameEnded)
             {
                 TogglePauseMenu();
             }
@@ -63,7 +68,7 @@ public class PauseMenu : MonoBehaviour
     public void DisableComponents() {
         PageController.TurnPageOn(PageType.PauseMenu);
         Time.timeScale = 0f;
-        if(Camera.main != null)
+        if(Camera.main != null && Camera.main.GetComponent<CameraController>())
             Camera.main.GetComponent<CameraController>().enabled = false;
         if(Player.GetComponent<PlayerController>() != null)
             Player.GetComponent<PlayerController>().enabled = false;

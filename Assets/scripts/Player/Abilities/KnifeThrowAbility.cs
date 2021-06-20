@@ -39,7 +39,7 @@ public class KnifeThrowAbility : MonoBehaviour
             transform.parent.parent.GetComponent<PlayerController>().canRotate = false;
             if(transform.parent.parent.GetComponent<PlayerCombat>().currentWeapon != null && transform.root.GetComponent<PlayerCombat>().currentWeapon.GetComponent<Melee>() != null) {
                 // transform.parent.parent.GetComponent<PlayerCombat>().currentWeapon.GetComponent<Melee>().canAttack = false;
-                transform.parent.parent.GetComponent<PlayerCombat>().currentWeapon.GetComponent<Melee>().UnequipSword();
+                //transform.parent.parent.GetComponent<PlayerCombat>().currentWeapon.GetComponent<Melee>().UnequipSword();
             }
         } else {
             transform.parent.parent.GetComponent<PlayerController>().canRotate = true;

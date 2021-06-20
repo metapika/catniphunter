@@ -42,6 +42,9 @@ public class CameraController : MonoBehaviour
 
         postProcessVolume.profile.TryGet(out cameraVignette);
 
+        targetIndicatorRef = Instantiate(targetIndicatorPrefab, Vector3.zero, Quaternion.identity).GetComponent<SpriteBillboard>();
+        targetIndicatorRef.gameObject.SetActive(false);
+
         if(!lockCursor) return;
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
@@ -111,7 +114,7 @@ public class CameraController : MonoBehaviour
         cameraCollision.HadleLockOnCollision(new Vector3(0f, 0f, -2.5f));
         transform.localPosition = cameraReset;
         
-        if(targetIndicatorRef != null) Destroy(targetIndicatorRef.gameObject);
+        if(targetIndicatorRef) targetIndicatorRef.gameObject.SetActive(false);
 
         StartCoroutine(Lerp(vignetteTime, cameraVignette.intensity.value, cameraVignette.intensity.value, defaultVignette));
     }
@@ -127,9 +130,12 @@ public class CameraController : MonoBehaviour
         Quaternion lookAt = Quaternion.RotateTowards(transform.rotation, targetRotation, Time.deltaTime * playerCombat.lockOnSmoothness);
 
         characterCenter.rotation = lookAt;
-
-        if(targetIndicatorRef == null) targetIndicatorRef = Instantiate(targetIndicatorPrefab, target.position + new Vector3(0, 1.5f, 0), Quaternion.identity).GetComponent<SpriteBillboard>();
-        targetIndicatorRef.mainCam = GetComponent<Camera>();
+        
+        if(targetIndicatorRef) {
+            targetIndicatorRef.gameObject.SetActive(true);
+            targetIndicatorRef.transform.position = target.position + new Vector3(0, 1.5f, 0);
+            targetIndicatorRef.mainCam = GetComponent<Camera>();
+        }
     }
     private IEnumerator Lerp(float time, float value, float startValue, float targetValue)
     {

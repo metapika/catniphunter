@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Default Local Group
+  m_EditorClassIdentifier: 
+  m_GroupName: Default Local Group
+  m_Data:
+    m_SerializedData: []
+  m_GUID: b80ee8ad8b2c210f88df6e48544066d4
+  m_SerializeEntries:
+  - m_GUID: 07e71974a807bec1cb405cd3e379359b
+    m_Address: weapons/Katana.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - katana
+    m_MainAsset: {fileID: 4995140533981461001, guid: 07e71974a807bec1cb405cd3e379359b, type: 3}
+    m_TargetAsset: {fileID: 4995140533981461001, guid: 07e71974a807bec1cb405cd3e379359b, type: 3}
+  - m_GUID: 10db42f90155a1c109e0ceb6db2e735c
+    m_Address: weapons/StealthKnife.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - knife
+    m_MainAsset: {fileID: 3661686523096451747, guid: 10db42f90155a1c109e0ceb6db2e735c, type: 3}
+    m_TargetAsset: {fileID: 3661686523096451747, guid: 10db42f90155a1c109e0ceb6db2e735c, type: 3}
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 36f4a3b1ad110ff63b482dfa7963d15a, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: c9054d08d45ab75ebbfc8bb8efb69317, type: 2}
+    - {fileID: 11400000, guid: ddde9a8c3860d7493bd0ca7744690e1e, type: 2}

@@ -12,7 +12,6 @@ public class PlayerPhysics : MonoBehaviour
     public Vector3 slidingDirection;
     public float slopeLimit;
     public float slidingSpeed = 2f;
-    public LayerMask ignoreSlidingLayers;
     private Vector3 hitNormal;
     private GameObject hitObject;
     public bool sliding;
@@ -56,46 +55,49 @@ public class PlayerPhysics : MonoBehaviour
         if (impact.magnitude > 0.2) controller.Move(impact * Time.deltaTime);
             impact = Vector3.Lerp(impact, Vector3.zero, 5 * Time.deltaTime);
 
-        if (activePlatform != null)
-        {
-            Vector3 newGlobalPlatformPoint = activePlatform.TransformPoint(activeLocalPlatformPoint);
-            moveDirection = newGlobalPlatformPoint - activeGlobalPlatformPoint;
-            if (moveDirection.magnitude > 0.01f)
-            {
-                controller.Move(moveDirection);
-            }
-            if (activePlatform)
-            {
-                // Support moving platform rotation
-                Quaternion newGlobalPlatformRotation = activePlatform.rotation * activeLocalPlatformRotation;
-                Quaternion rotationDiff = newGlobalPlatformRotation * Quaternion.Inverse(activeGlobalPlatformRotation);
-                // Prevent rotation of the local up vector
-                rotationDiff = Quaternion.FromToRotation(rotationDiff * Vector3.up, Vector3.up) * rotationDiff;
-                transform.rotation = rotationDiff * transform.rotation;
-                transform.eulerAngles = new Vector3(0, transform.eulerAngles.y, 0);
 
-                UpdateMovingPlatform();
-            }
-        }
-        else
-        {
-            if (moveDirection.magnitude > 0.01f)
-            {
-                moveDirection = Vector3.Lerp(moveDirection, Vector3.zero, Time.deltaTime);
-                controller.Move(moveDirection);
-            }
-        }
+        //Platform shit
 
-        if(!IsGrounded())
-        {
-            activePlatform = null;
-        }
+        // if (activePlatform != null)
+        // {
+        //     Vector3 newGlobalPlatformPoint = activePlatform.TransformPoint(activeLocalPlatformPoint);
+        //     moveDirection = newGlobalPlatformPoint - activeGlobalPlatformPoint;
+        //     if (moveDirection.magnitude > 0.01f)
+        //     {
+        //         controller.Move(moveDirection);
+        //     }
+        //     if (activePlatform)
+        //     {
+        //         // Support moving platform rotation
+        //         Quaternion newGlobalPlatformRotation = activePlatform.rotation * activeLocalPlatformRotation;
+        //         Quaternion rotationDiff = newGlobalPlatformRotation * Quaternion.Inverse(activeGlobalPlatformRotation);
+        //         // Prevent rotation of the local up vector
+        //         rotationDiff = Quaternion.FromToRotation(rotationDiff * Vector3.up, Vector3.up) * rotationDiff;
+        //         transform.rotation = rotationDiff * transform.rotation;
+        //         transform.eulerAngles = new Vector3(0, transform.eulerAngles.y, 0);
+
+        //         UpdateMovingPlatform();
+        //     }
+        // }
+        // else
+        // {
+        //     if (moveDirection.magnitude > 0.01f)
+        //     {
+        //         moveDirection = Vector3.Lerp(moveDirection, Vector3.zero, Time.deltaTime);
+        //         controller.Move(moveDirection);
+        //     }
+        // }
+
+        // if(!IsGrounded())
+        // {
+        //     activePlatform = null;
+        // }
     }
     private void HandleSlidingOffSlopes()
     {
         if(hitObject == null) return;
 
-        if(hitObject.layer == ignoreSlidingLayers) return;
+        if(hitObject.layer == 16) return;
 
         if (Vector3.Angle(Vector3.up, hitNormal) > slopeLimit && Vector3.Angle(Vector3.up, hitNormal) < 89f)
         {

@@ -10,12 +10,19 @@ namespace UnityCore {
         public class ButtonManager : MonoBehaviour
         {
             private PageController PageController;
-            public SceneController SceneController;
+            private SceneController SceneController;
             public PauseMenu PauseMenu;
             public GameObject menuOnly;
 
             void Start() {
-                PageController = GetComponent<PageController>();
+                PageController = PageController.instance;
+                SceneController = SceneController.instance;
+                PauseMenu = GetComponent<PauseMenu>();
+            }
+            private void Awake() {
+                CheckpointManagement.checkpointIndex = 0;
+                PlayerCombat.aquiredWeapons.Clear();
+                PlayerCombat.weaponsToInstantiate.Clear();
             }
 
             public void ModeSelect() {
@@ -32,7 +39,19 @@ namespace UnityCore {
                 PageController.TurnPageOff(PageType.MainMenu, PageType.Customize);
             }
 
-            public void Restart() {
+            public void RestartHard() {
+                PauseMenu.EnableComponents();
+                PageController.TurnPageOff(PageType.DeathScreen);
+                PageController.TurnPageOff(PageType.EndGameScreen);
+                
+                CheckpointManagement.checkpointIndex = 0;
+                PlayerCombat.aquiredWeapons.Clear();
+                PlayerCombat.weaponsToInstantiate.Clear();
+
+                string currentSceneName = SceneManager.GetActiveScene().name;
+                SceneManager.LoadScene(currentSceneName);
+            }
+            public void RestartFromCheckpoint() {
                 PauseMenu.EnableComponents();
                 PageController.TurnPageOff(PageType.DeathScreen);
                 PageController.TurnPageOff(PageType.EndGameScreen);
@@ -75,6 +94,7 @@ namespace UnityCore {
             // ------------------------Missions-----------------------------
             public void TutorialMission() {
                 PageController.TurnPageOff(PageType.MissionSelect);
+                PageController.TurnPageOff(PageType.ModeSelect);
                 SceneController.Load(SceneType.TutorialLevel, (_scene) => {
                                      Debug.Log("Scene [" + _scene + "] loaded from the button manager!" );
                                     }, false, PageType.Loading);

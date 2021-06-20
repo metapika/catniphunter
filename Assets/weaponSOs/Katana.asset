@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fcc9dc9151b29d28a54fb4d80f1803d, type: 3}
   m_Name: Katana
   m_EditorClassIdentifier: 
+  weaponType: 0
   damage: 20
   attackSpeed: 15
+  multipleAnimations: 1
+  stealthWeapon: 0
   animationTrigger: katana
+  prefabPath: Assets/prefabs/weapons/Katana.prefab

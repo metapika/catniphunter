@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class SoftRespawnTrigger : MonoBehaviour
 {
+    [SerializeField] private CheckpointManagement checkpointManagement;
     private void OnTriggerEnter(Collider other) {
         if(other.CompareTag("Player")) 
         {
-            other.GetComponent<PlayerStats>().SoftRespawn();
+            checkpointManagement.SoftRespawn();
         }
     }
 }

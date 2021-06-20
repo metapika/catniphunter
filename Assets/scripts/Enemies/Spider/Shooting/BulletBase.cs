@@ -7,12 +7,17 @@ public class BulletBase: MonoBehaviour
     public float bulletSpeed = 50f;
     public float bulletRemoveTime = 4f; 
     public int bulletDamage;
+    public string bulletTag = "BlasterBullet";
     public GameObject hitParticles;
-    public Transform enemy;
+    [HideInInspector] public Transform enemy;
 
     public Vector3 prevPos;
+    private ObjectPooler objectPooler;
     
-    void Start()
+    private void Start() {
+        objectPooler = ObjectPooler.instance;
+    }
+    void OnEnable()
     {
         StartCoroutine(DestroyBullet());
 
@@ -24,38 +29,37 @@ public class BulletBase: MonoBehaviour
 
         transform.Translate(0f, 0f, bulletSpeed * Time.deltaTime);
         
-        RaycastHit[] hits = Physics.RaycastAll(new Ray(prevPos, (transform.position - prevPos).normalized), (transform.position - prevPos).magnitude);
+        RaycastHit hit;
         
-        for (int i = 0; i < hits.Length; i++)
+        
+        if(Physics.Raycast(new Ray(prevPos, (transform.position - prevPos).normalized), out hit, (transform.position - prevPos).magnitude))
         {
-            if(hits[i].collider.gameObject.CompareTag("Player"))
+            if(hit.collider.gameObject.CompareTag("Player"))
             {
-                Debug.Log(hits[i].collider.name);
-                hits[i].transform.GetComponent<PlayerStats>().ParryDecision(bulletDamage, enemy);
-                Destroy(gameObject);
+                hit.transform.GetComponent<PlayerStats>().ParryDecision(bulletDamage, enemy);
+                gameObject.SetActive(false);
                 return;
             }
-            else if(hits[i].collider.gameObject.CompareTag("Shield"))
+            else if(hit.collider.gameObject.CompareTag("Shield"))
             {
-                Debug.Log(hits[i].collider.name);
-                hits[i].transform.GetComponent<Shield>().BlockDamage(bulletDamage);
-                Destroy(gameObject);
+                hit.transform.GetComponent<Shield>().BlockDamage(bulletDamage);
+                gameObject.SetActive(false);
                 return;
             }
-            else if(hits[i].collider.gameObject.CompareTag("Enemy") || hits[i].collider.gameObject.CompareTag("Bullet"))
+            else if(hit.collider.gameObject.CompareTag("Enemy") || hit.collider.gameObject.CompareTag("Bullet"))
             {
                 return;
             } else {
-                Debug.Log(hits[i].collider.name);
-                Destroy(gameObject);
+                gameObject.SetActive(false);
             }
         }
+
         //Instantiate(hitParticles, transform.position, Quaternion.identity);
     }
 
     public IEnumerator DestroyBullet() {
         yield return new WaitForSeconds(bulletRemoveTime);
 
-        Destroy(gameObject);
+        gameObject.SetActive(false);
     }
 }

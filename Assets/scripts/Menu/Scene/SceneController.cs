@@ -139,7 +139,7 @@ namespace UnityCore {
                 return true;
             }
 
-            private string SceneTypeToString(SceneType _scene) {
+            public string SceneTypeToString(SceneType _scene) {
                 switch (_scene) {
                     case SceneType.TutorialLevel: return "TutorialLevel";
                     case SceneType.Menus: return "Menus";
@@ -150,7 +150,7 @@ namespace UnityCore {
                 }
             }
 
-            private SceneType StringToSceneType(string _scene) {
+            public SceneType StringToSceneType(string _scene) {
                 switch (_scene) {
                     case "TutorialLevel": return SceneType.TutorialLevel;
                     case "Menus": return SceneType.Menus;

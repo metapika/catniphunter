@@ -7,8 +7,10 @@ public class WeaponPad : MonoBehaviour
 {
     #region Fields
     public GameObject activeWeapon;
+    private Melee activeWeaponInfo;
     public float weaponRotationSpeed = 5f;
     private Transform player;
+    private PlayerCombat playerCombat;
     public WeaponInfo_SO weaponInfoDefinition;
     public GameObject weaponInfoPrompt;
     public TextMeshProUGUI weaponName;
@@ -25,14 +27,27 @@ public class WeaponPad : MonoBehaviour
     private void Start() {
         anim = GetComponent<Animator>();
         player = GameObject.Find("RoboSamurai").transform;
+        playerCombat = player.GetComponent<PlayerCombat>();
 
         foreach (Transform weapon in transform) {
             if(weapon.CompareTag("Weapon") || weapon.CompareTag("Melee") || weapon.CompareTag("Ability")) {
                 activeWeapon = weapon.gameObject;
+                activeWeaponInfo = activeWeapon.GetComponent<Melee>();
             }
         }
 
         UpdateWeaponInfoDisplay();
+
+        if(activeWeapon)
+        {
+            foreach (Transform weapon in playerCombat.handR)
+            {
+                if(weapon.GetComponent<Melee>().weaponDefinition.weaponType == activeWeaponInfo.weaponDefinition.weaponType)
+                {
+                    Destroy(gameObject);
+                }
+            }
+        }
     }
 
     private void Update() {

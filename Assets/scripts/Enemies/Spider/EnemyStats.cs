@@ -11,7 +11,6 @@ public class EnemyStats : MonoBehaviour
     private NavMeshAgent agent;
     public GameObject hitText;
     public bool gettingKnockbacked = false;
-    public float knockbackTime = 0.3f;
     public float confusionTime = 1f;
     public bool confused = false;
     public Transform playerVar;
@@ -26,6 +25,7 @@ public class EnemyStats : MonoBehaviour
     public LegReferences legs;
     private KeepBodyUp kbUp;
     private EnemyShoot shoot;
+    private EnemySight sight;
     private EnemyMovement movement;
     private Rigidbody rb;
     private void Update() {
@@ -44,20 +44,25 @@ public class EnemyStats : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         kbUp = GetComponent<KeepBodyUp>();
         playerCombat = playerVar.GetComponent<PlayerCombat>();
-        
+        sight = GetComponent<EnemySight>();
+
         currentHealth = maxHealth;
     }
-    public void TakeDamage(int amount, Transform player = null)
+    public void TakeDamage(int amount, bool stealthKill, Transform player = null)
     {
         if(dead) return;
 
-        if(player && !playerVar) {
+        if(player) {
             playerVar = player;
+            sight.player = player;
         }
+
+        if(!stealthKill) { sight.justSawPlayer = true; sight.AlertOthers(); }
+
         currentHealth -= amount;
 
         if(currentHealth <= 0)
-            StartCoroutine(Die());
+            StartCoroutine(Die(stealthKill));
         if(hitText != null)
             ShowFloatingText(amount.ToString());
         
@@ -82,9 +87,15 @@ public class EnemyStats : MonoBehaviour
         Instantiate(hitText, transform.position, Quaternion.identity);
         hitText.GetComponent<TextMesh>().text = amount;
     }
-    private IEnumerator Die()
+    private IEnumerator Die(bool stealthKill)
     {
         dead = true;
+
+        //Alert nearby
+        if(!stealthKill)
+        {
+            sight.AlertOthers();
+        }
 
         gameObject.tag = "Untagged";
         if(playerCombat) playerCombat.enemyDetector.RemoveEnemy(transform, true);
@@ -117,39 +128,40 @@ public class EnemyStats : MonoBehaviour
         
         yield return null;
     }
-    public IEnumerator Knockback(Transform pos, float knockbackStrenght)
-    {
-        // Rigidbody rb = GetComponent<Rigidbody>();
-        // NavMeshAgent agent = GetComponent<NavMeshAgent>();
+
+    // public IEnumerator Knockback(Transform pos, float knockbackStrenght)
+    // {
+    //     // Rigidbody rb = GetComponent<Rigidbody>();
+    //     // NavMeshAgent agent = GetComponent<NavMeshAgent>();
         
-        // if(!dead) {
-        //     gettingKnockbacked = true;
+    //     // if(!dead) {
+    //     //     gettingKnockbacked = true;
 
-        //     rb.isKinematic = false;
-        //     agent.enabled = false;
-        // }
+    //     //     rb.isKinematic = false;
+    //     //     agent.enabled = false;
+    //     // }
 
-        float oldSpeed = agent.speed;
-        Vector3 direction = transform.position - pos.root.position;
-        direction.y = 0;
+    //     float oldSpeed = agent.speed;
+    //     Vector3 direction = transform.position - pos.root.position;
+    //     direction.y = 0;
 
-        agent.speed = 10f;
-        if(agent.enabled) {
-            agent.SetDestination(direction * knockbackStrenght);
-        }
+    //     agent.speed = 10f;
+    //     if(agent.enabled) {
+    //         agent.SetDestination(direction * knockbackStrenght);
+    //     }
 
-        yield return new WaitForSeconds(knockbackTime);
+    //     yield return new WaitForSeconds(knockbackTime);
         
-        agent.speed = oldSpeed;
-        if(agent.enabled) {
-            agent.SetDestination(transform.position);
-        }
+    //     agent.speed = oldSpeed;
+    //     if(agent.enabled) {
+    //         agent.SetDestination(transform.position);
+    //     }
 
-        // if(!dead) {
-        //     rb.isKinematic = true;
-        //     agent.enabled = true;
+    //     // if(!dead) {
+    //     //     rb.isKinematic = true;
+    //     //     agent.enabled = true;
 
-        //     gettingKnockbacked = false;
-        // }
-    }
+    //     //     gettingKnockbacked = false;
+    //     // }
+    // }
 }

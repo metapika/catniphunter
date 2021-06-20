@@ -15,5 +15,7 @@ public class Weapon_SO : ScriptableObject
     public int damage = 20;
     public int attackSpeed = 15;
     public bool multipleAnimations = true;
+    public bool stealthWeapon = false;
     public string animationTrigger = "katana";
+    public string prefabPath;
 }

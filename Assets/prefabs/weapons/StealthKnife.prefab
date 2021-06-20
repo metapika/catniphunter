@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 18104530202747199}
   m_Layer: 18
   m_Name: StealthKnife
-  m_TagString: Knife
+  m_TagString: Melee
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 3661686523096451747}
   m_LocalRotation: {x: 0.12844144, y: -0.1699663, z: -0.8095617, w: 0.54701376}
   m_LocalPosition: {x: 0.4650343, y: 2.2006457, z: -0.38110083}
-  m_LocalScale: {x: 1.0102848, y: 1.0832406, z: 1.1449981}
+  m_LocalScale: {x: 1.0013928, y: 0.9364211, z: 1.0656267}
   m_Children:
   - {fileID: 5062091985152969282}
   m_Father: {fileID: 0}
@@ -64,6 +64,8 @@ MonoBehaviour:
   - 0
   - 0
   canAttack: 1
+  timeStopDuration: 0.15
+  minKnifeKillDistance: 2
   trail: {fileID: 0}
   hitParticles: {fileID: 4438507562965381952, guid: 3600ae06b5f2ebb8a98b48bc26d7ebf7, type: 3}
   sword1: {fileID: 0}

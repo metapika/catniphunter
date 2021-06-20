@@ -1,21 +1,26 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using System.Linq;
 using DG.Tweening;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.AddressableAssets;
 
 public class PlayerCombat : MonoBehaviour
 {
     #region Fields
     public bool canDetectEnemies = true;
-    public GameObject currentWeapon;
+    public Melee currentWeapon;
+    public int selectedWeapon = 0;
     public Transform weaponCase;
     public Transform handR;
     public Transform handL;
     public GameObject crossair;
     public Transform currentAbilities;
+    public static List<string> aquiredWeapons = new List<string>();
+    public static List<Object> weaponsToInstantiate = new List<Object>();
     
     [Space]
 
@@ -69,15 +74,104 @@ public class PlayerCombat : MonoBehaviour
 
         volume.profile.TryGet(out dodgeDistortion);
 
-        currentWeapon = GetObtainedWeapons();
+        if(PlayerCombat.aquiredWeapons.Count != 0)
+        {
+            for (int i = 0; i < PlayerCombat.aquiredWeapons.Count; i++)
+            {
+                Object prefab = AssetDatabase.LoadAssetAtPath(aquiredWeapons[i], typeof(GameObject));
+
+                weaponsToInstantiate.Add(prefab);
+            }
+            Debug.Log(weaponsToInstantiate.Count);
+
+            foreach (Object weapon in weaponsToInstantiate)
+            {
+                GameObject instantiatedWeapon = Instantiate(weapon, handR.position, handR.rotation, handR) as GameObject;
+
+                PositionSelectedWeapon(instantiatedWeapon.GetComponent<Melee>());
+            }
+
+        }
+        RefreshWeaponList();
+
+        SelectWeapon();
 
         if(currentWeapon != null) {
-            if(currentWeapon.GetComponent<Melee>().weaponDefinition.weaponType == Weapon_SO.WeaponType.DoubleSwords) {
-                currentWeapon.GetComponent<Melee>().sword1.GetComponent<BoxCollider>().enabled = false;
-                currentWeapon.GetComponent<Melee>().sword2.GetComponent<BoxCollider>().enabled = false;
+            if(currentWeapon.weaponDefinition.weaponType == Weapon_SO.WeaponType.DoubleSwords) {
+                currentWeapon.sword1.GetComponent<BoxCollider>().enabled = false;
+                currentWeapon.sword2.GetComponent<BoxCollider>().enabled = false;
             } else {
                 currentWeapon.GetComponent<BoxCollider>().enabled = false;
             }
+        }
+    }
+    private void Update() {
+        
+        if(camControl.CameraToggleState()) TargetLockOnDetection();
+        else TargetDetection();
+
+        LockOnIndexing();
+
+        if(Time.timeScale <= 0) return;
+
+        if(Input.GetKeyDown(KeyCode.R) && targetNotBehindCover && targets.Count > 0 || Input.GetKeyDown(KeyCode.R) && targets.Count > 0 && camControl.CameraToggleState())
+        {
+            camControl.ToggleCameraLockOn();
+        }
+        
+        if(camControl.CameraToggleState()) {
+            if(Input.GetKeyDown(KeyCode.LeftShift))
+            {
+                if(parryTimerCoroutine == null) 
+                {
+                    parryTimerCoroutine =  StartCoroutine(ButtonClicked(parryTimerReset));
+                } else {
+                    StopCoroutine(parryTimerCoroutine);
+                    parryTimerCoroutine =  StartCoroutine(ButtonClicked(parryTimerReset));
+                }
+            }
+        }
+
+        if(currentWeapon && handR.childCount > 1) {
+            if(currentWeapon.canAttack) {
+                int previousSelectedWeapon = selectedWeapon;
+
+                if(Input.GetKeyDown(KeyCode.Alpha1)) {
+                    selectedWeapon = 0;
+                } else if(Input.GetKeyDown(KeyCode.Alpha2)) {
+                    selectedWeapon = 1;
+                }
+
+                if(previousSelectedWeapon != selectedWeapon)
+                {
+                    SelectWeapon();
+                }
+            }
+        }
+    }
+    private void RefreshWeaponList()
+    {
+        PlayerCombat.aquiredWeapons.Clear();
+        PlayerCombat.weaponsToInstantiate.Clear();
+
+        foreach (Transform weapon in handR)
+        {
+            PlayerCombat.aquiredWeapons.Add(weapon.GetComponent<Melee>().weaponDefinition.prefabPath);
+        }
+        Debug.Log(aquiredWeapons.Count);
+    }
+    private void SelectWeapon()
+    {
+        int i = 0;
+
+        foreach (Transform weapon in handR)
+        {
+            if(i == selectedWeapon) {
+                EquipWeapon(weapon.gameObject, i);
+            }
+            else
+                UnEquipWeapon(weapon.gameObject);
+            i++;
         }
     }
     Coroutine parryTimerCoroutine;
@@ -88,7 +182,7 @@ public class PlayerCombat : MonoBehaviour
 
             if(pad.activeWeapon != null) {
                 if(pad.activeWeapon.CompareTag("Weapon") || pad.activeWeapon.CompareTag("Melee") ) {
-                    EquipWeapon(pad.activeWeapon);
+                    PickUpWeapon(pad.activeWeapon);
                     pad.anim.enabled = false;
                     pad.activeWeapon = null;
                 } else if(pad.activeWeapon.CompareTag("Ability")) {
@@ -98,6 +192,42 @@ public class PlayerCombat : MonoBehaviour
                 }
             }
         }
+    }
+    private void PickUpWeapon(GameObject weapon) {
+        if(currentWeapon) UnEquipWeapon(currentWeapon.gameObject);
+        EquipWeapon(weapon, handR.childCount);
+
+        PositionSelectedWeapon(currentWeapon);
+
+        currentWeapon.InitializeEquip();
+        //currentWeapon.EquipSword();
+
+        RefreshWeaponList();
+    }
+    private void PositionSelectedWeapon(Melee weapon)
+    {
+        if(weapon.weaponDefinition.weaponType == Weapon_SO.WeaponType.Katana) {
+            weapon.transform.SetParent(handR);
+            weapon.transform.position = handR.position;
+            weapon.transform.rotation = handR.rotation;
+        }
+        else if(weapon.weaponDefinition.weaponType == Weapon_SO.WeaponType.Knife){
+            weapon.transform.SetParent(handR);
+            weapon.transform.localPosition = new Vector3(0.0102468356f,-0.0182343591f,-0.0692017823f);
+            weapon.transform.localEulerAngles = new Vector3(38.4835701f,91.0783463f,249.838348f);
+        }  
+    }
+    private void EquipWeapon(GameObject weapon, int index)
+    {
+        weapon.SetActive(true);
+        currentWeapon = weapon.GetComponent<Melee>();
+        selectedWeapon = index;
+    }
+    private void UnEquipWeapon(GameObject weapon)
+    {
+        weapon.gameObject.SetActive(false);
+        
+        //weapon.GetComponent<Melee>().UnequipSword();
     }
     
     #endregion
@@ -178,30 +308,7 @@ public class PlayerCombat : MonoBehaviour
         // }
         dashParticles.Stop();
     }
-    private void Update() {
-        if(camControl.CameraToggleState()) TargetLockOnDetection();
-        else TargetDetection();
 
-        LockOnIndexing();
-
-        if(Input.GetKeyDown(KeyCode.R) && targetNotBehindCover && targets.Count > 0 || Input.GetKeyDown(KeyCode.R) && targets.Count > 0 && camControl.CameraToggleState())
-        {
-            camControl.ToggleCameraLockOn();
-        }
-        
-        if(camControl.CameraToggleState()) {
-            if(Input.GetKeyDown(KeyCode.LeftShift))
-            {
-                if(parryTimerCoroutine == null) 
-                {
-                    parryTimerCoroutine =  StartCoroutine(ButtonClicked(parryTimerReset));
-                } else {
-                    StopCoroutine(parryTimerCoroutine);
-                    parryTimerCoroutine =  StartCoroutine(ButtonClicked(parryTimerReset));
-                }
-            }
-        }
-    }
     private void TargetDetection() {
         if(!canDetectEnemies) return;
 
@@ -259,7 +366,7 @@ public class PlayerCombat : MonoBehaviour
     {
         if (Vector3.Distance(transform.position, target.position) > minOffsetToDash && Vector3.Distance(transform.position, target.position) < 10)
         {
-            if(currentWeapon.GetComponent<Melee>().weaponDefinition.weaponType != Weapon_SO.WeaponType.Knife) {
+            if(currentWeapon.weaponDefinition.weaponType != Weapon_SO.WeaponType.Knife) {
                 if(camControl.CameraToggleState()) transform.DOMove(TargetOffset(lockOnTarget), .3f);
                 else transform.DOMove(TargetOffset(nearestTarget), .3f);
 
@@ -311,44 +418,6 @@ public class PlayerCombat : MonoBehaviour
         lockIndex = max + lockIndex;
         lockOnTarget = targets[lockIndex];
     }
-    private void EquipWeapon(GameObject weapon) {
-        currentWeapon = weapon;
-        
-        currentWeapon.transform.SetParent(weaponCase);
-        currentWeapon.transform.position = weaponCase.position;
-        currentWeapon.transform.rotation = weaponCase.rotation;
-
-        if(weapon.GetComponent<Melee>() != null) {
-            weapon.GetComponent<Melee>().InitializeEquip();
-        }
-    }
-    private GameObject GetObtainedWeapons() {
-        GameObject selectedWeapon = null;
-
-        foreach (Transform possibleWeapon in weaponCase) {
-            if(possibleWeapon.gameObject.activeSelf) {
-                if(possibleWeapon.CompareTag("Weapon") || possibleWeapon.CompareTag("Melee")) {
-                    selectedWeapon = possibleWeapon.gameObject;
-                    return selectedWeapon;
-                }
-            }
-        }
-
-        if(selectedWeapon == null) {
-            foreach (Transform possibleWeapon in handR) {
-                if(possibleWeapon.gameObject.activeSelf) {
-                    if(possibleWeapon.CompareTag("Weapon") || possibleWeapon.CompareTag("Melee")) {
-                        if(selectedWeapon == null) {
-                            selectedWeapon = possibleWeapon.gameObject;
-                            return selectedWeapon;
-                        }
-                    }
-                }
-            } 
-        }
-
-        return selectedWeapon;
-    }
     private void EquipMod(int ID) {
         var mod = abilityList.allMods[ID];
         var abilityID = mod.GetComponent<AbilityID>();
@@ -362,9 +431,9 @@ public class PlayerCombat : MonoBehaviour
     }
     public void EnableCutter()
     {
-        if(currentWeapon.GetComponent<Melee>().weaponDefinition.weaponType == Weapon_SO.WeaponType.DoubleSwords) {
-            currentWeapon.GetComponent<Melee>().sword1.GetComponent<BoxCollider>().enabled = true;
-            currentWeapon.GetComponent<Melee>().sword2.GetComponent<BoxCollider>().enabled = true;
+        if(currentWeapon.weaponDefinition.weaponType == Weapon_SO.WeaponType.DoubleSwords) {
+            currentWeapon.sword1.GetComponent<BoxCollider>().enabled = true;
+            currentWeapon.sword2.GetComponent<BoxCollider>().enabled = true;
         } else {
             currentWeapon.GetComponent<BoxCollider>().enabled = true;
         }
@@ -372,16 +441,16 @@ public class PlayerCombat : MonoBehaviour
     }
     public void DisableCutter()
     {
-        if(currentWeapon.GetComponent<Melee>().weaponDefinition.weaponType == Weapon_SO.WeaponType.DoubleSwords) {
-            currentWeapon.GetComponent<Melee>().sword1.GetComponent<BoxCollider>().enabled = false;
-            currentWeapon.GetComponent<Melee>().sword2.GetComponent<BoxCollider>().enabled = false;
+        if(currentWeapon.weaponDefinition.weaponType == Weapon_SO.WeaponType.DoubleSwords) {
+            currentWeapon.sword1.GetComponent<BoxCollider>().enabled = false;
+            currentWeapon.sword2.GetComponent<BoxCollider>().enabled = false;
         } else {
             currentWeapon.GetComponent<BoxCollider>().enabled = false;
         }
     }
     public void StartCombo() {
-        if(currentWeapon.GetComponent<Melee>().weaponDefinition.weaponType == Weapon_SO.WeaponType.Katana)
-            currentWeapon.GetComponent<Melee>().trail.Play();
+        if(currentWeapon.weaponDefinition.weaponType == Weapon_SO.WeaponType.Katana)
+            currentWeapon.trail.Play();
         
         if(targets.Count > 0)
         {
@@ -391,21 +460,21 @@ public class PlayerCombat : MonoBehaviour
             }
         }
 
-        currentWeapon.GetComponent<Melee>().canAttack = false;
+        currentWeapon.canAttack = false;
         movement.canMove = false;
     }
     public void StopCombo() {
-        if(currentWeapon.GetComponent<Melee>().weaponDefinition.weaponType == Weapon_SO.WeaponType.Katana) {
-            currentWeapon.GetComponent<Melee>().trail.Stop();
+        if(currentWeapon.weaponDefinition.weaponType == Weapon_SO.WeaponType.Katana) {
+            currentWeapon.trail.Stop();
         }
-        currentWeapon.GetComponent<Melee>().canAttack = true;
+        currentWeapon.canAttack = true;
         movement.canMove = true;
     }
-    public void NoLongerInCombat() {
-        anim.SetBool("inCombat", false);
+    // public void NoLongerInCombat() {
+    //     anim.SetBool("inCombat", false);
 
-        currentWeapon.GetComponent<Melee>().UnequipSword();
-    }
+    //     currentWeapon.GetComponent<Melee>().UnequipSword();
+    // }
 
     #endregion
 }

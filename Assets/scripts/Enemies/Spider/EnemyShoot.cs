@@ -11,9 +11,10 @@ public class EnemyShoot : MonoBehaviour
     [Header("--------------------------Universal--------------------------")]
     public EnemyType enemyType;
     public GameObject blasterProjectile;
+    public string blasterProjectileTag;
     public GameObject missileProjectile;
     public Transform rifle, rifle2, gunPoint, gunPoint2;
-    public GameObject shootingParticles;
+    public string shootingParticlesTag;
     [Space]
     public bool canShoot = true;
     public int damage = 5;
@@ -23,11 +24,13 @@ public class EnemyShoot : MonoBehaviour
 
     private EnemySight sight;
     private EnemyStats stats;
+    private ObjectPooler objectPooler;
     
     void Start()
     {
         sight = GetComponent<EnemySight>();
         stats = GetComponent<EnemyStats>();
+        objectPooler = ObjectPooler.instance;
     }
 
     void Update()
@@ -75,17 +78,18 @@ public class EnemyShoot : MonoBehaviour
         // rate of fire in weapons is in rounds per minute (RPM), therefore we should calculate how much time passes before firing a new round in the same burst.
         for (int i = 0; i < burstSize + 1; i++)
         {
-            Instantiate(shootingParticles, gunPoint.position, gunPoint.rotation);
-            Instantiate(shootingParticles, gunPoint2.position, gunPoint2.rotation);
+            objectPooler.SpawnFromPool(shootingParticlesTag, gunPoint.position, gunPoint.rotation);
+            objectPooler.SpawnFromPool(shootingParticlesTag, gunPoint2.position, gunPoint2.rotation);
 
-            BulletBase bullet1 = Instantiate(bulletPrefab, gunPoint.position, gunPoint.rotation).GetComponent<BulletBase>();
-            BulletBase bullet2 = Instantiate(bulletPrefab, gunPoint2.position, gunPoint2.rotation).GetComponent<BulletBase>();
+            BulletBase bullet1 = objectPooler.SpawnFromPool(blasterProjectileTag, gunPoint.position, gunPoint.rotation).GetComponent<BulletBase>();
+            BulletBase bullet2 = objectPooler.SpawnFromPool(blasterProjectileTag, gunPoint2.position, gunPoint2.rotation).GetComponent<BulletBase>();
                 
             bullet1.bulletDamage = damage;
             bullet2.bulletDamage = damage;
 
             bullet1.enemy = transform;
             bullet2.enemy = transform;
+
             yield return new WaitForSeconds(timeBetweenBursts);
         }
         

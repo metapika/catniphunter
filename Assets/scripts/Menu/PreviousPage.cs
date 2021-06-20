@@ -31,7 +31,7 @@ public class PreviousPage : MonoBehaviour
         }
 
         if(pageHistory.Count > 0) {
-            if(Input.GetKeyDown(KeyCode.Tab))
+            if(Input.GetButtonDown("MenuBack"))
             {
                 PageType currentPage = pageHistory[pageHistory.Count - 1];
                 PageType targetPage = PageType.None;
