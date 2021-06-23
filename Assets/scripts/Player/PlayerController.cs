@@ -10,11 +10,16 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float slopeForceRayLength = 1.2f;
     private float originalHeight;
     [SerializeField] private Vector3 originalCenter;
+    public float walkFOVChangeTime = 1f;
+    public float walkFOVValue = 75f;
+    private float cameraDefaultFOV;
 
     [HideInInspector] public Vector3 moveDir;
     [HideInInspector] public CharacterController controller;
     public bool canRotate = true;
     public bool canMove = true;
+    public bool canJump = true;
+    public bool canToggleWalk = true;
     public bool crouching = false;
     private float speedSmoothTime = 0.1f;
     private bool jumpWasPressed;
@@ -27,6 +32,7 @@ public class PlayerController : MonoBehaviour
     private float stepOffset;
     private static readonly int hashSpeedPercentage = Animator.StringToHash("SpeedPercentage");
     public MoneyManager money;
+    private Camera mainCam;
     
     #endregion
 
@@ -37,6 +43,8 @@ public class PlayerController : MonoBehaviour
         pphysics = GetComponent<PlayerPhysics>();
         combat = GetComponent<PlayerCombat>();
         anim = GetComponent<Animator>();
+        mainCam = Camera.main;
+        cameraDefaultFOV = mainCam.fieldOfView;
 
         originalHeight = controller.height;
         originalCenter = controller.center;
@@ -63,6 +71,7 @@ public class PlayerController : MonoBehaviour
     #endregion
 
     #region Custom Functions
+    Coroutine fovToggleCoroutine;
     private void Movement() {
         if(!canMove) return;
 
@@ -83,14 +92,19 @@ public class PlayerController : MonoBehaviour
                 if(crouching)
                 {
                     UnCrouch();
-
                 }
                 else
                 {
+                    if(stats.GetCurrentSpeed() == stats.GetWalkSpeed()) Togglewalk();
                     Crouch();
                 }
             }
+            if(Input.GetKeyDown(KeyCode.LeftControl) && canToggleWalk)
+            {
+                Togglewalk();
+            }
         }
+
         if(pphysics.IsGrounded()) {
             controller.stepOffset = stepOffset;
         } else if(!pphysics.sliding) {
@@ -98,7 +112,7 @@ public class PlayerController : MonoBehaviour
         }
 
         float calculatedSpeed = 0;
-        float targetSpeed = stats.currentSpeed * movementInput.magnitude;
+        float targetSpeed = stats.GetCurrentSpeed() * movementInput.magnitude;
         calculatedSpeed = Mathf.Lerp(0, targetSpeed, speedSmoothTime);
         if(Time.timeScale > 0) {
             if(canRotate && desiredMoveDirection != Vector3.zero) {
@@ -113,7 +127,46 @@ public class PlayerController : MonoBehaviour
             controller.Move(Vector3.down * controller.height / 2 * slopeForce * Time.deltaTime);
         }
 
-        anim.SetFloat(hashSpeedPercentage, 1f * movementInput.magnitude, speedSmoothTime, Time.deltaTime);
+        if(stats.GetCurrentSpeed() == stats.GetWalkSpeed()) anim.SetFloat(hashSpeedPercentage, 0.5f * movementInput.magnitude, speedSmoothTime, Time.deltaTime);
+        else anim.SetFloat(hashSpeedPercentage, 1f * movementInput.magnitude, speedSmoothTime, Time.deltaTime);
+    }
+    public void Togglewalk()
+    {
+        if(stats.GetCurrentSpeed() == stats.GetWalkSpeed())
+        {
+            stats.ChangeSpeed(stats.GetSprintSpeed());
+            SprintFOV(walkFOVChangeTime, cameraDefaultFOV);
+
+        } 
+        else if(stats.GetCurrentSpeed() == stats.GetSprintSpeed())
+        {
+            UnCrouch();
+            stats.ChangeSpeed(stats.GetWalkSpeed());
+            SprintFOV(walkFOVChangeTime, walkFOVValue);
+        }
+    }
+    public void SprintFOV(float time, float targetValue)
+    {
+        if(fovToggleCoroutine == null) 
+        {
+            fovToggleCoroutine =  StartCoroutine(ChangeSprintFOV(time, targetValue));
+        } else {
+            StopCoroutine(fovToggleCoroutine);
+            fovToggleCoroutine =  StartCoroutine(ChangeSprintFOV(time, targetValue));
+        }
+    }
+    private IEnumerator ChangeSprintFOV(float time, float targetValue)
+    {
+        float start = Time.time;
+
+        while (Time.time < start + time)
+        {
+            float completion = (Time.time - start) / time;
+            mainCam.fieldOfView = Mathf.Lerp(mainCam.fieldOfView, targetValue, completion);
+            yield return null;
+        }
+
+        mainCam.fieldOfView = targetValue;
     }
     public void UnCrouch()
     {
@@ -129,7 +182,7 @@ public class PlayerController : MonoBehaviour
 
         crouching = false;
 
-        stats.ChangeSpeed(stats.sprintSpeed);
+        stats.ChangeSpeed(stats.GetSprintSpeed());
         anim.SetBool("crouching", false);
     }
     public bool CheckIfCanUncrouch()
@@ -143,7 +196,7 @@ public class PlayerController : MonoBehaviour
         crouching = true;
         controller.height = 1.3f;
         controller.center = new Vector3(0f, -0.15f, 0f);
-        stats.ChangeSpeed(stats.crouchSpeed);
+        stats.ChangeSpeed(stats.GetCrouchSpeed());
         anim.SetBool("crouching", true);
     }
     private bool OnSlope()
@@ -162,7 +215,7 @@ public class PlayerController : MonoBehaviour
     }
 
     private void Jumping() {
-        if(!canMove) return;
+        if(!canMove || !canJump) return;
         
         if(Input.GetKeyDown(KeyCode.Space)) 
         {
@@ -179,7 +232,7 @@ public class PlayerController : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.Space) && canDoubleJump && !canJumpNoGrounded) 
         {
             canDoubleJump = false;
-            pphysics.velocity.y = Mathf.Sqrt(stats.doubleJumpForce * -2f * pphysics.currentGravity);
+            pphysics.velocity.y = Mathf.Sqrt(stats.GetDoubleJumpForce() * -2f * pphysics.currentGravity);
         }
         
         if(!pphysics.IsGrounded())

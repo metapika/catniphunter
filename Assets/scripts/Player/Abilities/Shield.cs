@@ -10,8 +10,8 @@ public class Shield : MonoBehaviour
     public GameObject gfx;
 
     public void BlockDamage(int amount) {
-        transform.root.GetComponent<PlayerStats>().TakeDamage(0);
-        Debug.Log("Blocked " + amount / 4 + " damage!");
+        // transform.root.GetComponent<PlayerStats>().TakeDamage(0);
+        // Debug.Log("Blocked " + amount / 4 + " damage!");
     }
 
     // public void ApplyHealth(int healthAmount)

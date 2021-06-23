@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 1415339536737916188}
   m_LocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 1.342, y: 0, z: 0}
-  m_LocalScale: {x: 0.0956221, y: 0.09361211, z: 0.47127897}
+  m_LocalScale: {x: 0.12749614, y: 0.124816135, z: 0.628372}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -95,8 +95,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b946f8299086ac03aa9f7f063bae0bd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletSpeed: 100
-  bulletRemoveTime: 50
+  bulletSpeed: 70
+  bulletRemoveTime: 20
   bulletDamage: 5
   bulletTag: BlasterBullet
   hitParticles: {fileID: 721811861951029676, guid: 780ea90b0d770284d971fb32abf0a9fe, type: 3}

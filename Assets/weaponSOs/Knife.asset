@@ -18,4 +18,4 @@ MonoBehaviour:
   multipleAnimations: 0
   stealthWeapon: 1
   animationTrigger: stealthKnife
-  prefabPath: Assets/prefabs/weapons/StealthKnife.prefab
+  prefab: {fileID: 3661686523096451747, guid: 10db42f90155a1c109e0ceb6db2e735c, type: 3}

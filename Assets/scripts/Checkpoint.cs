@@ -14,7 +14,7 @@ public class Checkpoint : MonoBehaviour
                 if(transform.position == manager.checkpointPositions[i])
                 {
                     CheckpointManagement.checkpointIndex = i;
-                    other.GetComponent<PlayerStats>().ApplyHealth(1000);
+                    //other.GetComponent<PlayerStats>().ApplyHealth(1000);
                 }
             }
         }

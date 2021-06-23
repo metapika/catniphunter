@@ -5007,7 +5007,7 @@ Transform:
   m_GameObject: {fileID: 4995140533981461001}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.9255505, y: 1, z: 0.9696748}
+  m_LocalScale: {x: 1.6211287, y: 1.7515293, z: 1.6984141}
   m_Children:
   - {fileID: 4995140534209748241}
   - {fileID: 4995140533518134396}
@@ -5025,8 +5025,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 0
   serializedVersion: 2
-  m_Size: {x: 0.403424, y: 0.35200465, z: 1.7689435}
-  m_Center: {x: 0.098697595, y: 0.018874425, z: 1.033282}
+  m_Size: {x: 0.7595532, y: 0.5751079, z: 1.7689435}
+  m_Center: {x: 0.09869761, y: 0.018874422, z: 1.033282}
 --- !u!114 &4995140533981461044
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5045,10 +5045,10 @@ MonoBehaviour:
   - 10
   - 10
   canAttack: 1
-  timeStopDuration: 0.15
+  timeStopDuration: 0.1
   minKnifeKillDistance: 0.3
   trail: {fileID: 4995140534849810413}
-  hitParticles: {fileID: 4438507562965381952, guid: 3600ae06b5f2ebb8a98b48bc26d7ebf7, type: 3}
+  hitParticlesTag: HitSparks
   sword1: {fileID: 0}
   sword2: {fileID: 0}
 --- !u!1 &4995140534209748240

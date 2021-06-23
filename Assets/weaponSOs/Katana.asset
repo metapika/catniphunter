@@ -18,4 +18,4 @@ MonoBehaviour:
   multipleAnimations: 1
   stealthWeapon: 0
   animationTrigger: katana
-  prefabPath: Assets/prefabs/weapons/Katana.prefab
+  prefab: {fileID: 4995140533981461001, guid: 07e71974a807bec1cb405cd3e379359b, type: 3}

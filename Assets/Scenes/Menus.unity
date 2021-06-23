@@ -1657,7 +1657,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 5323258554119559538}
         m_TargetAssemblyTypeName: UnityCore.Menu.ButtonManager, Assembly-CSharp
-        m_MethodName: Restart
+        m_MethodName: RestartHard
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -9893,8 +9893,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14.8
-  m_fontSizeBase: 14.8
+  m_fontSize: 16.7
+  m_fontSizeBase: 16.7
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -10055,7 +10055,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -232, y: -15.5}
-  m_SizeDelta: {x: 175.48, y: 49.0245}
+  m_SizeDelta: {x: 178.6696, y: 49.0245}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1327510699
 MonoBehaviour:
@@ -24845,7 +24845,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Withdraw
+  m_text: Quit
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5271fc701e0b4f51b9d37bc49326108c, type: 2}
   m_sharedMaterial: {fileID: 7561892738393639727, guid: 5271fc701e0b4f51b9d37bc49326108c, type: 2}
@@ -24872,8 +24872,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 27.13
-  m_fontSizeBase: 27.13
+  m_fontSize: 29.16
+  m_fontSizeBase: 29.16
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -24958,7 +24958,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -232, y: -137.89471}
-  m_SizeDelta: {x: 175.48288, y: 49.024467}
+  m_SizeDelta: {x: 117.4296, y: 49.0245}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &4887167217180175377
 MonoBehaviour:

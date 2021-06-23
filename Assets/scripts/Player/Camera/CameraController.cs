@@ -89,6 +89,7 @@ public class CameraController : MonoBehaviour
 
                     if(!Physics.Raycast(transform.root.position, dirToTarget, dstToTarget, envoriementMask)) 
                     {
+                        controller.canRotate = false;
                         Vector3 cameraReset = new Vector3(1, transform.localPosition.y, transform.localPosition.z);
                         
                         cameraCollision.HadleLockOnCollision(new Vector3(1f, 0f, -2.5f));
@@ -108,6 +109,7 @@ public class CameraController : MonoBehaviour
 
     private void LockOnOff()
     {
+        controller.canRotate = true;
         Vector3 cameraReset = new Vector3(0, transform.localPosition.y, transform.localPosition.z);
         lockOnTarget = false;
 

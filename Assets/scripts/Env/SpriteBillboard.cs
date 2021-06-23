@@ -6,7 +6,9 @@ public class SpriteBillboard : MonoBehaviour
 {
     [HideInInspector] public Camera mainCam;
     public bool fullAxis;
-
+    private void Awake() {
+        mainCam = Camera.main;
+    }
     void Update()
     {
         transform.LookAt(mainCam.transform.position);

@@ -21,8 +21,7 @@ namespace UnityCore {
             }
             private void Awake() {
                 CheckpointManagement.checkpointIndex = 0;
-                PlayerCombat.aquiredWeapons.Clear();
-                PlayerCombat.weaponsToInstantiate.Clear();
+                PlayerCombat.weaponInventory.Clear();
             }
 
             public void ModeSelect() {
@@ -43,10 +42,10 @@ namespace UnityCore {
                 PauseMenu.EnableComponents();
                 PageController.TurnPageOff(PageType.DeathScreen);
                 PageController.TurnPageOff(PageType.EndGameScreen);
+                PauseMenu.gameEnded = false;
                 
                 CheckpointManagement.checkpointIndex = 0;
-                PlayerCombat.aquiredWeapons.Clear();
-                PlayerCombat.weaponsToInstantiate.Clear();
+                PlayerCombat.weaponInventory.Clear();
 
                 string currentSceneName = SceneManager.GetActiveScene().name;
                 SceneManager.LoadScene(currentSceneName);

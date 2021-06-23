@@ -44885,6 +44885,13 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
+  - time: 0
+    functionName: EnableTrail
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
   - time: 0.36666667
     functionName: EnableCutter
     data: 
@@ -44901,6 +44908,13 @@ AnimationClip:
     messageOptions: 0
   - time: 0.6666667
     functionName: DisableCutter
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: 1.0333333
+    functionName: DisableTrail
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

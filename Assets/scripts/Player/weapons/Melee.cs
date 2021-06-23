@@ -13,13 +13,14 @@ public class Melee : MonoBehaviour
     public float minKnifeKillDistance = 0.3f;
     public ParticleSystem trail;
     public string hitParticlesTag = "HitSparks";
-    private PlayerCombat combat;
     private Animator anim;
     
     [Header("Only check this if the weapon is double swords")]    
     public Transform sword1;
     public Transform sword2;
+    private PlayerCombat combat;
     private PlayerPhysics pphysics;
+    private PlayerStats stats;
     private ObjectPooler objectPooler;
 
     #endregion
@@ -27,6 +28,10 @@ public class Melee : MonoBehaviour
     #region Unity Functions
     private void Start() {
         objectPooler = ObjectPooler.instance;
+        
+        if(weaponDefinition.weaponType == Weapon_SO.WeaponType.Katana) {
+            trail.Stop();
+        }
     }
     private void Awake() {
         if(transform.parent.CompareTag("WeaponHolder")) {
@@ -44,15 +49,17 @@ public class Melee : MonoBehaviour
         if(Time.timeScale <= 0) return;
         
         if(canAttack && transform.parent != null) {
-            if(Input.GetButtonDown("Attack") && transform.parent.CompareTag("WeaponHolder") && !IsUsingShield()) {
+            if(Input.GetButtonDown("Attack") && transform.parent.CompareTag("WeaponHolder") && !IsUsingShield() && stats.currentHealth > 0) {
                 if(combat.currentWeapon == this) {
                     if(pphysics.movement.CheckIfCanUncrouch()) return;
 
                     if(weaponDefinition.weaponType != Weapon_SO.WeaponType.Knife)
                     {
-                        pphysics.movement.UnCrouch();
+                        if(pphysics.movement.crouching) pphysics.movement.UnCrouch();
                         //EquipSword();
                     }
+
+                    if(stats.GetCurrentSpeed() == stats.GetWalkSpeed()) stats.controller.Togglewalk();
                     Attack();
                 }
             }
@@ -84,6 +91,15 @@ public class Melee : MonoBehaviour
     #region Custom Functions
     int attacknum = 1;
     private void Attack() {
+        if(weaponDefinition.weaponType == Weapon_SO.WeaponType.Knife && !combat.camControl.CameraToggleState())
+        {
+            Vector3 forward = Camera.main.transform.forward;
+            forward.y = 0;
+            forward.Normalize();
+            
+            transform.root.LookAt(transform.root.position + forward);
+        }
+
         attacknum++;
         if(attacknum == 4)
         {
@@ -113,6 +129,7 @@ public class Melee : MonoBehaviour
         combat = transform.root.GetComponent<PlayerCombat>();
         pphysics = transform.root.GetComponent<PlayerPhysics>();
         anim = transform.root.GetComponent<Animator>();
+        stats = transform.root.GetComponent<PlayerStats>();
     }
     private bool IsUsingShield()
     {

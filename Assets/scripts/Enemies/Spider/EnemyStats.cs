@@ -57,7 +57,7 @@ public class EnemyStats : MonoBehaviour
             sight.player = player;
         }
 
-        if(!stealthKill) { sight.justSawPlayer = true; sight.AlertOthers(); }
+        if(!stealthKill) { sight.justSawPlayer = true; sight.ShowPlayerSpottedIndicator(); sight.AlertOthers(); }
 
         currentHealth -= amount;
 
@@ -97,6 +97,9 @@ public class EnemyStats : MonoBehaviour
             sight.AlertOthers();
         }
 
+        Destroy(sight.playerSpottedIndicator);
+        Destroy(sight.playerNotInSightIndicator);
+        
         gameObject.tag = "Untagged";
         if(playerCombat) playerCombat.enemyDetector.RemoveEnemy(transform, true);
         

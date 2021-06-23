@@ -93,11 +93,11 @@
                 fixed4 hexEdgeTerm = hexEdgeTex * _HexEdgeColor * _HexEdgeIntensity * max(sin((horizontalDist + verticalDist) * _HexEdgePosScale - _Time.y * _HexEdgeTimeScale) - _HexEdgeWidthModifier, 0.0f) * (1 / (1 - _HexEdgeWidthModifier));
                 
                 fixed4 edgeTex = tex.b;
-                fixed4 edgeTerm = pow(edgeTex.a, _EdgeExponent) * _EdgeColor * _EdgeIntensity;
+                fixed4 edgeTerm = pow(edgeTex.a, 2.7f) * _EdgeColor * _EdgeIntensity;
 
                 float diff = tex2D(_CameraDepthNormalsTexture, i.screenPos.xy).r - i.depth;
                 float intersectGradient = 1 - min(diff / _ProjectionParams.w, 1.0f);
-                fixed4 intersectTerm = _Color * pow(intersectGradient, _IntersectExponent) * _IntersectIntensity;
+                fixed4 intersectTerm = _Color * pow(intersectGradient, 0.1f) * _IntersectIntensity;
                 
                 return fixed4(_Color.rgb + pulseTerm.rgb + hexEdgeTerm.rgb + edgeTerm + intersectTerm, _Color.a);
             }

@@ -17,5 +17,5 @@ public class Weapon_SO : ScriptableObject
     public bool multipleAnimations = true;
     public bool stealthWeapon = false;
     public string animationTrigger = "katana";
-    public string prefabPath;
+    public GameObject prefab;
 }

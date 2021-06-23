@@ -7,17 +7,17 @@ public class ShieldAbility : MonoBehaviour
     public GameObject shield;
     private Shield shieldBehavior;
     public bool blocking;
-    private PlayerPhysics pphysics;
     private Animator playerAnim;
     private Animator shieldAnim;
-    private PlayerController player;
+    private PlayerPhysics pphysics;
+    private PlayerStats stats;
     private PlayerCombat combat;
     public BoxCollider col;
 
     private void Awake() {
         pphysics = transform.root.gameObject.GetComponent<PlayerPhysics>();
-        player = transform.root.gameObject.GetComponent<PlayerController>();
         combat = transform.root.gameObject.GetComponent<PlayerCombat>();
+        stats = transform.root.gameObject.GetComponent<PlayerStats>();
         playerAnim = transform.root.gameObject.GetComponent<Animator>();
         shieldBehavior = shield.GetComponent<Shield>();
         shieldAnim = shield.GetComponent<Animator>();
@@ -47,28 +47,53 @@ public class ShieldAbility : MonoBehaviour
                 DisableShield();
             }
         }
+        if(blocking)
+        {
+            playerAnim.SetBool("blocking", true);
+            if(stats.controller.moveDir == Vector3.zero)
+            {
+                playerAnim.SetBool("blockingStanding", true);
+            } else {
+                playerAnim.SetBool("blockingStanding", false);
+            }
+            
+            stats.controller.canRotate = false;
+            stats.controller.canJump = false;
+            
+            if(!combat.camControl.CameraToggleState())
+            {
+                Vector3 forward = Camera.main.transform.forward;
+                forward.y = 0;
+                forward.Normalize();
+                
+                transform.root.LookAt(transform.root.position + forward);
+            }
+        }
+        else
+        {
+            playerAnim.SetBool("blocking", false);
+            playerAnim.SetBool("blockingStanding", false);
 
+            if(!combat.camControl.CameraToggleState())
+            stats.controller.canRotate = true;
+            stats.controller.canJump = true;
+        }
     }
     private void Shield() {
-        playerAnim.SetBool("blocking", true);
         shieldAnim.SetBool("blocking", true);
+
+        stats.ChangeSpeed(stats.GetShieldSpeed());
 
         shieldBehavior.gfx.SetActive(true);
         col.enabled = true;
         blocking = true;
-        if(combat.targets.Count == 0)
-        {
-            Vector3 forward = Camera.main.transform.forward;
-            forward.y = 0;
-            forward.Normalize();
-            
-            transform.root.LookAt(transform.root.position + forward);
-        }
     }
 
     public void DisableShield() {
-        playerAnim.SetBool("blocking", false);
         shieldAnim.SetBool("blocking", false);
+        if(stats.controller.crouching) stats.ChangeSpeed(stats.GetCrouchSpeed());
+        else stats.ChangeSpeed(stats.GetSprintSpeed());
+
         col.enabled = false;
         blocking = false;
     }

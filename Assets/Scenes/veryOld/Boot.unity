@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.37312627, g: 0.380745, b: 0.35872802, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -357,6 +357,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
+  m_PresetInfoIsWorld: 0
 --- !u!223 &431883339
 Canvas:
   m_ObjectHideFlags: 0
@@ -644,22 +645,23 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: af8a7732ab9fb4ddc866d8634896f6be, type: 3}
-    m_FontSize: 58
+    m_FontSize: 61
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 5
-    m_MaxSize: 61
+    m_MaxSize: 86
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: RoboSamurai is a in-developement game. What you will experience in a second
-    is a "development version" - things you see may not resemble the final product
-    and may change in the development process. If you have any feedback/suggestions/bugs
-    you want to share with me, be sure to visit the comment section of the game's
-    itch.io page. Anyhow, enjoy the game.
+  m_Text: "RoboSamurai is a game being developed by meta. things might and will break,
+    if you see any bugs or have any suggestions feel free to comment them on the
+    official itch.io page. this is a passion project and will take me years to develop,
+    take into consideration that this is my first game and what you see here is one
+    of the first ever public test builds. \nany criticism is very much welcome. \nplease
+    enjoy the game."
 --- !u!222 &1928325073
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -715,6 +717,7 @@ MonoBehaviour:
   m_StopNaN: 0
   m_Dithering: 0
   m_ClearDepth: 1
+  m_AllowXRRendering: 1
   m_RequiresDepthTexture: 0
   m_RequiresColorTexture: 0
   m_Version: 2

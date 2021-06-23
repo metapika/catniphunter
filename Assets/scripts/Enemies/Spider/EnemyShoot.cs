@@ -35,7 +35,7 @@ public class EnemyShoot : MonoBehaviour
 
     void Update()
     {
-        if(!stats.gettingKnockbacked)
+        if(!stats.gettingKnockbacked && !stats.dead)
         {
             if(sight.playerInAttackRange) AttackPlayer();
         }

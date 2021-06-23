@@ -12,12 +12,17 @@ public class EnemySight : MonoBehaviour
     public bool playerInSightRange;
     public bool playerInAttackRange;
     public bool justSawPlayer;
+    public GameObject playerSpottedIndicator;
+    public GameObject playerNotInSightIndicator;
     public LayerMask playerMask;
     public LayerMask envoriementMask;
     public LayerMask enemyMask;
     public Transform player;
     private void Start() {
         StartCoroutine("FindTargetsWithDelay", .2f);
+
+        playerSpottedIndicator.SetActive(false);
+        playerNotInSightIndicator.SetActive(false);
     }
     void FindVisibleTargets()
     {
@@ -38,8 +43,14 @@ public class EnemySight : MonoBehaviour
                         playerInSightRange = true;
                         if(dstToTarget <= attackRange)
                             playerInAttackRange = true;
+                        ShowPlayerSpottedIndicator();
                     } else {
                         PlayerDissapeared();
+                        if(playerSpottedIndicator && playerNotInSightIndicator)
+                        {
+                            playerSpottedIndicator.SetActive(false);
+                            playerNotInSightIndicator.SetActive(true);
+                        }
                     }
                 }
             }
@@ -69,6 +80,7 @@ public class EnemySight : MonoBehaviour
             if(othersSight) {
                 othersSight.player = player;
                 othersSight.justSawPlayer = true;
+                othersSight.ShowPlayerSpottedIndicator();
             }
         }
     }
@@ -78,5 +90,13 @@ public class EnemySight : MonoBehaviour
             angleInDegrees += transform.eulerAngles.y;
         }
         return new Vector3(Mathf.Sin(angleInDegrees * Mathf.Deg2Rad), 0, Mathf.Cos(angleInDegrees * Mathf.Deg2Rad));
+    }
+    public void ShowPlayerSpottedIndicator()
+    {
+        if(playerNotInSightIndicator && playerSpottedIndicator)
+        {
+            playerNotInSightIndicator.SetActive(false);
+            playerSpottedIndicator.SetActive(true);
+        }
     }
 }

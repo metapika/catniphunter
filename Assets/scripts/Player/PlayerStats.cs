@@ -10,33 +10,41 @@ public class PlayerStats : MonoBehaviour
 {
     #region Fields
     [Header("Health and speed values")]
-    public int currentHealth = 0;
-    public int maxHealth = 0;
-    public float currentSpeed;
-    public float crouchSpeed = 30f;
-    public float sprintSpeed = 100f;
-    public int speedScale = 1;
+    public float currentHealth = 0;
+    [SerializeField] private int maxHealth = 0;
+    [SerializeField] private float autoRegenAmount = 0.25f;
+    [SerializeField] private bool canAutoRegen = true;
+    [SerializeField] private float outOfCombatResetTime = 10;
+    [SerializeField] private float outOfCombatTimer = 0;
+    [SerializeField] private float outOfCombatRate = 0.25f;
+    [SerializeField] private float currentSpeed;
+    [SerializeField] private float crouchSpeed = 30f;
+    [SerializeField] private float walkSpeed = 60f;
+    [SerializeField] private float sprintSpeed = 100f;
+    [SerializeField] private float shieldSpeed = 50f;
+    [SerializeField] private int speedScale = 1;
     public float jumpForce = 3;
-    public float doubleJumpForce = 2;
+    [SerializeField] private float doubleJumpForce = 2;
     private bool canTakeDamage = true;
+    
     [Space]
 
     [Header("Death and such")]
-    public Slider healthBar;
-    public Image blackDeathScreen;
-    public float deathFadeInTime = 1f;
-    public TextMeshProUGUI healthText;
-    public GameObject hitTextPopUp;
-    public Image hitIndicator;
-    public float hitWearOffTime;
-    public GameObject GameUI;
-    public LayerMask whatIsPlayer;
-    public Material deathMaterial;
-    public SkinnedMeshRenderer playerOverall;
-    public SkinnedMeshRenderer playerDetails;
+    [SerializeField] private Slider healthBar;
+    [SerializeField] private  Image blackDeathScreen;
+    [SerializeField] private GameObject GameUI;
+    [SerializeField] private GameObject hitTextPopUp;
+    [SerializeField] private Image hitIndicator;
+    [SerializeField] private float deathFadeInTime = 3f;
+    [SerializeField] private float hitWearOffTime = 1f;
+    [SerializeField] private LayerMask whatIsPlayer;
+    [SerializeField] private Material deathMaterial;
+    [SerializeField] private SkinnedMeshRenderer playerOverall;
+    [SerializeField] private SkinnedMeshRenderer playerDetails;
     private bool dead;
     private PlayerCombat combat;
     private SceneController SceneController;
+    [HideInInspector] public PlayerController controller;
     [HideInInspector] public PageController PageController;
     private ButtonManager buttonManager;
 
@@ -45,9 +53,10 @@ public class PlayerStats : MonoBehaviour
     #region Unity Functions
     private void Start() {
         combat = GetComponent<PlayerCombat>();
+        controller = GetComponent<PlayerController>();
         currentHealth = maxHealth;
 
-        currentSpeed = sprintSpeed * speedScale;
+        ChangeSpeed(sprintSpeed);
         
         if(healthBar != null) {
             healthBar.maxValue = maxHealth;
@@ -61,6 +70,16 @@ public class PlayerStats : MonoBehaviour
     }
 
     private void Update() {
+        if(canAutoRegen)
+        {
+            ResetInCombat();
+            
+            if(outOfCombatTimer == 0)
+            {
+                RegenHealth();
+            }
+        }
+
         if(SceneController != null) {
             if(currentHealth <= 0) {
                 if(!dead) {
@@ -69,7 +88,6 @@ public class PlayerStats : MonoBehaviour
             }
         }
     }
-    
     #endregion
 
     #region Stat Increasers
@@ -82,13 +100,32 @@ public class PlayerStats : MonoBehaviour
             currentHealth += amount;
         }
 
-        //ShowFloatingText(amount.ToString());
         UpdateUI();
+    }
+    public void RegenHealth()
+    {
+        if(currentHealth == 0 || currentHealth == maxHealth) return;
+
+        float count = 0;
+        if (currentHealth > 0) { count += Time.deltaTime; }
+        
+        while (count > 0)
+        {
+            if ((currentHealth + autoRegenAmount) > maxHealth)
+            {
+                currentHealth = maxHealth;
+            } else {
+                currentHealth += autoRegenAmount;
+            }
+            count = 0;
+
+            UpdateUI();
+        }
     }
     #endregion
 
     #region Stat Reducers
-    public void TakeDamage(int amount)
+    public void TakeDamage(float amount)
     {
         if(!canTakeDamage) return;
 
@@ -99,25 +136,74 @@ public class PlayerStats : MonoBehaviour
             currentHealth -= amount;
         }
 
+        PlayerEnteredCombat();
+
         ShowFloatingText(amount.ToString());
         HitUI();
 
+
         UpdateUI();
     }
+
+    #endregion
+    #region Stat Reporters]
+    public float GetCurrentSpeed()
+    {
+        return currentSpeed;
+    }
+    public float GetWalkSpeed()
+    {
+        return walkSpeed;
+    }
+    public float GetSprintSpeed()
+    {
+        return sprintSpeed;
+    }
+    public float GetCrouchSpeed()
+    {
+        return crouchSpeed;
+    }
+    public float GetShieldSpeed()
+    {
+        return shieldSpeed;
+    }
+    public float GetDoubleJumpForce()
+    {
+        return doubleJumpForce;
+    }
+    #endregion
+    #region Custom Functions
     public void ParryDecision(int amount, Transform enemy)
     {
         if(combat.canParry)
         {
-            StartCoroutine(combat.Dodge());
             StartCoroutine(enemy.GetComponent<EnemyStats>().Confusion());
         } else {
             TakeDamage(amount);
         }
     }
+    public void PlayerEnteredCombat()
+    {
+        outOfCombatTimer = outOfCombatResetTime;
+    }
+    public void ResetInCombat()
+    {
+        if(outOfCombatTimer == 0) return;
 
-    #endregion
-
-    #region Custom Functions
+        float count = 0;
+        if (outOfCombatTimer > 0) { count += Time.deltaTime; }
+        
+        while (count > 0)
+        {
+            if ((outOfCombatTimer - outOfCombatRate) < 0)
+            {
+                outOfCombatTimer = 0;
+            } else {
+                outOfCombatTimer -= outOfCombatRate;
+            }
+            count = 0;
+        }
+    }
     public void Die(string animationTrigger) {
         dead = true;
         LightsGoOut();
@@ -135,19 +221,15 @@ public class PlayerStats : MonoBehaviour
         GameUI.SetActive(false);
         Camera.main.GetComponent<CameraController>().enabled = false;
         GetComponent<PlayerPhysics>().enabled = false;
-        GetComponent<PlayerController>().enabled = false;
-        GetComponent<PlayerCombat>().enabled = false;
-        GetComponent<PlayerCombat>().currentAbilities.gameObject.SetActive(false);
+        controller.enabled = false;
+        combat.enabled = false;
+        combat.currentAbilities.gameObject.SetActive(false);
     }
     private IEnumerator FadeToBlackScreen() {
         yield return new WaitForSeconds(2);
         
         blackDeathScreen.gameObject.SetActive(true);
         StartCoroutine(LerpAlpha(deathFadeInTime, blackDeathScreen.color.a, 1f, 1));
-        
-        // Cursor.visible = true;
-        // Cursor.lockState = CursorLockMode.None;
-        // PageController.TurnPageOn(PageType.DeathScreen);
     }
     private void ShowFloatingText(string amount) {
         var hitText = Instantiate(hitTextPopUp, transform.position, Quaternion.identity);
@@ -202,7 +284,7 @@ public class PlayerStats : MonoBehaviour
     private void UpdateUI() {
         if(healthBar != null) {
             healthBar.value = currentHealth;
-            healthText.text = currentHealth.ToString();
+            //healthText.text = currentHealth.ToString();
         }
     }
 

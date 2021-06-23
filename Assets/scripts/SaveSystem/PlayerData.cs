@@ -4,7 +4,7 @@ using UnityEngine;
 
 [System.Serializable]
 public class PlayerData {
-    public int health;
+    public float health;
     public int damage;
 
     public PlayerData (PlayerStats player) {

@@ -20,11 +20,13 @@ public class DodgeAbility : MonoBehaviour
     private PlayerPhysics pphysics;
     private PlayerController movement;
     private PlayerStats stats;
+    private PlayerCombat combat;
     
     void Start() {
         movement = transform.root.gameObject.GetComponent<PlayerController>();
         pphysics = transform.root.gameObject.GetComponent<PlayerPhysics>();
         stats = transform.root.gameObject.GetComponent<PlayerStats>();
+        combat = transform.root.gameObject.GetComponent<PlayerCombat>();
 
         Camera m_MainCamera = Camera.main;
 
@@ -37,8 +39,9 @@ public class DodgeAbility : MonoBehaviour
     }
 
     void Update() {
-        if(Input.GetKeyDown(KeyCode.LeftShift) && pphysics.IsGrounded() && stats.currentSpeed == stats.sprintSpeed) {
+        if(Input.GetKeyDown(KeyCode.LeftShift) && pphysics.IsGrounded() && stats.GetCurrentSpeed() == stats.GetSprintSpeed()) {
             if(currentDodgeCount < dodgeCount) {
+                combat.DodgeInput();
                 StartCoroutine(Dodge());
             }
         }
@@ -72,7 +75,7 @@ public class DodgeAbility : MonoBehaviour
         }
 
         //Invincibility
-        transform.root.gameObject.GetComponent<PlayerStats>().enabled = false;
+        //transform.root.gameObject.GetComponent<PlayerStats>().enabled = false;
 
         //Particles
         if(useParticles) {
